@@ -1,5 +1,13 @@
 import type { MetaFunction } from "@remix-run/node";
+import { Form } from "@remix-run/react";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+
+import '../index.css'
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,50 +17,84 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
+  const [showPassword, setShowPassword] = useState(false);
+
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="flex flex-col items-center gap-16">
-        <header className="flex flex-col items-center gap-9">
-          <h1 className="leading text-2xl font-bold text-gray-800 dark:text-gray-100">
-            Welcome to <span className="sr-only">Remix</span>
-          </h1>
-          <h2 className="text-green-600">Tailwind</h2>
-          <Button>Shadcc</Button>
-          <div className="h-[144px] w-[434px]">
-            <img
-              src="/logo-light.png"
-              alt="Remix"
-              className="block w-full dark:hidden"
-            />
-            <img
-              src="/logo-dark.png"
-              alt="Remix"
-              className="hidden w-full dark:block"
-            />
-          </div>
-        </header>
-        <nav className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700">
-          <p className="leading-6 text-gray-700 dark:text-gray-200">
-            What&apos;s next?
-          </p>
-          <ul>
-            {resources.map(({ href, text, icon }) => (
-              <li key={href}>
-                <a
-                  className="group flex items-center gap-3 self-stretch p-3 leading-normal text-blue-700 hover:underline dark:text-blue-500"
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {icon}
-                  {text}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+   <>
+    <div className="min-h-screen index w-full flex items-center justify-center bg-gray-200">
+      <div className="w-full max-w-md px-4">
+        <Card className="w-full">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-blue-500 font-bold text-center">
+              Sunderbai Jewellers
+            </CardTitle>
+            <CardDescription className="text-center">
+              Enter your credentials to access the dashboard
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form className="space-y-4" >
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="email"
+                    placeholder="Enter Your Email"
+                    type="email"
+                    className="pl-10"
+                    required
+                    
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="password"
+                    placeholder="Enter Password"
+                    type={showPassword ? "text" : "password"}
+                    className="pl-10 pr-10"
+                    required
+                    
+                  />
+                  <button
+                    type="submit"
+                    onClick={togglePasswordVisibility}
+                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <Button type="submit" className="w-full">
+               Login
+              </Button>
+            </Form>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <div className="text-sm text-center text-gray-500">
+              <a href="#" className="hover:text-primary">
+                Forgot your password?
+              </a>
+            </div>
+            
+          </CardFooter>
+        </Card>
       </div>
     </div>
+   </>
   );
 }
 

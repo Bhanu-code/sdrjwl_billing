@@ -8,6 +8,8 @@ import {
 import type { LinksFunction } from "@remix-run/node";
 
 import "./tailwind.css";
+import Navbar from "./components/Navbar";
+import Sidebar from "./components/Sidebar";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -41,5 +43,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <>
+      <div className="w-screen h-screen overflow-hidden">
+        <Navbar />
+        <div className="flex">
+          <div className="w-[12rem]">
+            <Sidebar />
+          </div>
+          <div className="flex-1 h-screen">
+            <Outlet />
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }
