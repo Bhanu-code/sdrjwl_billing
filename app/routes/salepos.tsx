@@ -1,3 +1,5 @@
+import POSTable from "~/components/POS/POSTable"
+
 
 const salepos = () => {
   return (
@@ -6,7 +8,7 @@ const salepos = () => {
       {/* <CreatePOSModal onPOSCreated={handlePOSCreated} /> */}
     </div>
     <div className="data-table">
-      <POSTable refreshTable={refreshTable} />
+      <POSTable />
     </div>
   </div>
   )

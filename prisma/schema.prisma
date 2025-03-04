@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Company {
+  id           Int       @id @default(autoincrement())
+  company_name String
+  logo_url     String?
+  city         String?
+  district     String?
+  state        String?
+  contact_no   String?
+  gstin_no     String?
+  upi_id       String?
+  bis_reg_no   String?
+  pan_no       String?
+  created_at   DateTime? @default(now())
+  updated_at   DateTime? @updatedAt
+}
+
+model MasterEntry {
+  id                Int       @id @default(autoincrement())
+  gold_16c          Int?
+  gold_18c          Int?
+  gold_22c          Int?
+  gold_24c          Int?
+  silver_pure       Int?
+  silver_ornamental Int?
+  remarks           String?
+  created_at        DateTime? @default(now())
+  updated_at        DateTime? @updatedAt
+}
+
+model Customer {
+  id         Int       @id @default(autoincrement())
+  name       String
+  address    String?
+  city       String?
+  district   String?
+  state      String?
+  pincode    String?
+  contact_no String?
+  gstin_no   String?
+  upi_id     String?
+  pan_no     String?
+  created_at DateTime? @default(now())
+  updated_at DateTime? @updatedAt
+}
+
