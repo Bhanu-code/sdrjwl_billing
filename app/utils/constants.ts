@@ -53,6 +53,7 @@ export const navlinks = [
         name:"Reports",
         path: "/registration"
     },
+    
     {
         name:"Logout",
         path: "/registration"
@@ -85,6 +86,10 @@ export const tabs = [
         path: "/home/sales-return"
     },
     {
+        name: "About Company",
+        path: "/about_company"
+    },
+    {
         name:"Purchase Return",
         path: "/home/purchase-return"
     },
@@ -104,6 +109,7 @@ export const tabs = [
         name:"Supplier Pay",
         path: "/home/supplier-pay"
     },
+    
     
 ]
 export const reportTabs = [

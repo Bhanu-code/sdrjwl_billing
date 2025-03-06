@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 // import { invoke } from '@tauri-apps/api/core';
 import {
   FaEye,
@@ -9,7 +9,7 @@ import {
   FaCalendar,
   FaUser,
   FaPrint,
-} from 'react-icons/fa';
+} from "react-icons/fa";
 import {
   Table,
   TableBody,
@@ -30,6 +30,8 @@ import {
 // import { Input } from "@/components/ui/input";
 // import { Label } from "@/components/ui/label";
 import { useToast } from "~/components/ui/toast";
+import { Form } from "@remix-run/react";
+import { Input } from "./ui/input";
 
 // Define the Purchase type to match the backend structure
 interface Purchase {
@@ -52,9 +54,9 @@ interface PurchaseTableProps {
   refreshTable: boolean; // Prop to trigger refresh
 }
 
-export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
-//   const [purchases, setPurchases] = useState<Purchase[]>([]);
-  const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
+export function PurchaseTable({ refreshTable }: any) {
+  //   const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [selectedPurchase, setSelectedPurchase] = useState<any | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,48 +66,48 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
   const [purchases, setPurchases] = useState<Purchase[]>([
     {
       id: 1,
-      purity: '99.9',
-      description: 'Gold Ring',
+      purity: "99.9",
+      description: "Gold Ring",
       pieces: 1,
       net_weight: 10.5,
       gross_weight: 11.0,
       gold_rate: 5000,
       total_amount: 52447.5,
-      created_at: '2023-10-01T12:00:00Z',
-      product_code: 'GR001',
-      customer_name: 'John Doe',
-      customer_contact: '123-456-7890',
-      customer_address: '123 Main St, Springfield',
+      created_at: "2023-10-01T12:00:00Z",
+      product_code: "GR001",
+      customer_name: "John Doe",
+      customer_contact: "123-456-7890",
+      customer_address: "123 Main St, Springfield",
     },
     {
       id: 2,
-      purity: '91.6',
-      description: 'Gold Chain',
+      purity: "91.6",
+      description: "Gold Chain",
       pieces: 2,
       net_weight: 20.0,
       gross_weight: 21.0,
       gold_rate: 4800,
       total_amount: 87936.0,
-      created_at: '2023-10-02T14:30:00Z',
-      product_code: 'GC002',
-      customer_name: 'Jane Smith',
-      customer_contact: '987-654-3210',
-      customer_address: '456 Elm St, Metropolis',
+      created_at: "2023-10-02T14:30:00Z",
+      product_code: "GC002",
+      customer_name: "Jane Smith",
+      customer_contact: "987-654-3210",
+      customer_address: "456 Elm St, Metropolis",
     },
     {
       id: 3,
-      purity: '75.0',
-      description: 'Gold Bracelet',
+      purity: "75.0",
+      description: "Gold Bracelet",
       pieces: 1,
       net_weight: 15.0,
       gross_weight: 16.0,
       gold_rate: 4500,
       total_amount: 50625.0,
-      created_at: '2023-10-03T10:15:00Z',
-      product_code: 'GB003',
-      customer_name: 'Alice Johnson',
-      customer_contact: '555-123-4567',
-      customer_address: '789 Oak St, Smallville',
+      created_at: "2023-10-03T10:15:00Z",
+      product_code: "GB003",
+      customer_name: "Alice Johnson",
+      customer_contact: "555-123-4567",
+      customer_address: "789 Oak St, Smallville",
     },
   ]);
   const { toast } = useToast();
@@ -114,37 +116,35 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
   const fetchPurchases = async () => {
     try {
       setLoading(true);
-    //   const fetchedPurchases = await invoke<Purchase[]>('get_purchases');
-    //   setPurchases(fetchedPurchases);
+      //   const fetchedPurchases = await invoke<Purchase[]>('get_purchases');
+      //   setPurchases(fetchedPurchases);
       setLoading(false);
     } catch (err) {
-      console.error('Failed to fetch purchases:', err);
-      setError('Failed to load purchases');
+      console.error("Failed to fetch purchases:", err);
+      setError("Failed to load purchases");
       setLoading(false);
       toast({
         title: "Error",
         description: "Failed to fetch purchases",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
-    // Fetch purchases on component mount and when refreshTable changes
-    useEffect(() => {
-        // Since we're using demo data, we don't need to fetch anything
-        setLoading(false);
-      }, [refreshTable]);
-    
+  // Fetch purchases on component mount and when refreshTable changes
+  useEffect(() => {
+    // Since we're using demo data, we don't need to fetch anything
+    setLoading(false);
+  }, [refreshTable]);
 
   const handlePrintPurchase = (_purchase: Purchase) => {
-    // Basic print functionality 
+    // Basic print functionality
     window.print();
   };
 
-
   // Prepare for purchase deletion
   const handleDeleteConfirmation = (purchase: Purchase) => {
-    setSelectedPurchase(purchase);
+    setSelectedPurchase(purchase.id);
     setIsDeleteModalOpen(true);
   };
 
@@ -153,21 +153,21 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
     if (!selectedPurchase) return;
 
     try {
-    //   await invoke('delete_purchase', { purchaseId: selectedPurchase.id });
+      //   await invoke('delete_purchase', { purchaseId: selectedPurchase.id });
       await fetchPurchases(); // Refresh the list
       setIsDeleteModalOpen(false);
       setSelectedPurchase(null);
       toast({
         title: "Success",
         description: "Purchase deleted successfully",
-        variant: "success"
+        variant: "success",
       });
     } catch (error) {
-      console.error('Failed to delete purchase:', error);
+      console.error("Failed to delete purchase:", error);
       toast({
         title: "Error",
         description: "Failed to delete purchase",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -175,7 +175,7 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
   // Handle action buttons
   const handleShowDetails = (purchase: Purchase) => {
     setSelectedPurchase(purchase);
-    setIsDetailsModalOpen(true);  // Open details modal specifically
+    setIsDetailsModalOpen(true); // Open details modal specifically
   };
 
   // Fetch purchases on component mount
@@ -184,17 +184,19 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
   }, []);
 
   // Loading and error states
-  if (loading) return (
-    <div className="flex items-center justify-center h-screen w-full">
-      Loading purchases...
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-screen w-full">
+        Loading purchases...
+      </div>
+    );
 
-  if (error) return (
-    <div className="flex items-center justify-center h-screen w-full text-red-500">
-      Error: {error}
-    </div>
-  );
+  if (error)
+    return (
+      <div className="flex items-center justify-center h-screen w-full text-red-500">
+        Error: {error}
+      </div>
+    );
 
   return (
     <>
@@ -219,7 +221,7 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {purchases.map((purchase: Purchase) => (
+                {refreshTable?.map((purchase: Purchase) => (
                   <TableRow key={purchase.id}>
                     {/* <TableCell>{purchase.description}</TableCell> */}
                     <TableCell>{purchase.customer_name}</TableCell>
@@ -231,7 +233,9 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
                     <TableCell>{purchase.pieces}</TableCell>
                     <TableCell>{purchase.gold_rate}</TableCell>
                     <TableCell>{purchase.total_amount}</TableCell>
-                    <TableCell>{new Date(purchase.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      {new Date(purchase.created_at).toLocaleDateString()}
+                    </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
                         <Button
@@ -255,7 +259,7 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
                         <Button
                           variant="destructive"
                           size="icon"
-                          onClick={() => handleDeleteConfirmation(purchase)} 
+                          onClick={() => handleDeleteConfirmation(purchase)}
                           title="Delete Purchase"
                           className="h-8 w-8"
                         >
@@ -270,7 +274,13 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
                 <TableRow>
                   <TableCell colSpan={9}>Total Purchases</TableCell>
                   <TableCell className="text-right">
-                    {purchases.reduce((total, purchase) => total + purchase.total_amount, 0).toFixed(2)}
+                    {purchases
+                      .reduce(
+                        (total, purchase) => total + purchase.total_amount,
+                        0
+                      )
+                      .toFixed(2)}
+                      
                   </TableCell>
                   <TableCell colSpan={2}></TableCell>
                 </TableRow>
@@ -282,8 +292,8 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
 
       {/* Purchase Details Dialog */}
       {selectedPurchase && (
-        <Dialog 
-          open={isDetailsModalOpen} 
+        <Dialog
+          open={isDetailsModalOpen}
           onOpenChange={() => {
             setIsDetailsModalOpen(false);
             setSelectedPurchase(null);
@@ -304,16 +314,22 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
               <div className="bg-white shadow-md rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <FaBarcode className="mr-3 text-blue-600 text-xl" />
-                  <h3 className="text-lg font-semibold">Purchase Identification</h3>
+                  <h3 className="text-lg font-semibold">
+                    Purchase Identification
+                  </h3>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Purchase Description</span>
-                    <span className="font-medium">{selectedPurchase.description}</span>
+                    <span className="font-medium">
+                      {selectedPurchase.description}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Product Code</span>
-                    <span className="font-medium">{selectedPurchase.product_code}</span>
+                    <span className="font-medium">
+                      {selectedPurchase.product_code}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -322,20 +338,28 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
               <div className="bg-white shadow-md rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <FaUser className="mr-3 text-blue-600 text-xl" />
-                  <h3 className="text-lg font-semibold">Customer Information</h3>
+                  <h3 className="text-lg font-semibold">
+                    Customer Information
+                  </h3>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Customer Name</span>
-                    <span className="font-medium">{selectedPurchase.customer_name}</span>
+                    <span className="font-medium">
+                      {selectedPurchase.customer_name}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Contact Number</span>
-                    <span className="font-medium">{selectedPurchase.customer_contact}</span>
+                    <span className="font-medium">
+                      {selectedPurchase.customer_contact}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Address</span>
-                    <span className="font-medium">{selectedPurchase.customer_address}</span>
+                    <span className="font-medium">
+                      {selectedPurchase.customer_address}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -349,15 +373,21 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Net Weight</span>
-                    <span className="font-medium">{selectedPurchase.net_weight} gm</span>
+                    <span className="font-medium">
+                      {selectedPurchase.net_weight} gm
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Gross Weight</span>
-                    <span className="font-medium">{selectedPurchase.gross_weight} gm</span>
+                    <span className="font-medium">
+                      {selectedPurchase.gross_weight} gm
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Pieces</span>
-                    <span className="font-medium">{selectedPurchase.pieces}</span>
+                    <span className="font-medium">
+                      {selectedPurchase.pieces}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -366,20 +396,28 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
               <div className="bg-white shadow-md rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <FaCoins className="mr-3 text-blue-600 text-xl" />
-                  <h3 className="text-lg font-semibold">Financial Information</h3>
+                  <h3 className="text-lg font-semibold">
+                    Financial Information
+                  </h3>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Gold Rate</span>
-                    <span className="font-medium">₹{selectedPurchase.gold_rate.toFixed(2)}</span>
+                    <span className="font-medium">
+                      ₹{selectedPurchase.gold_rate.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Total Amount</span>
-                    <span className="font-medium">₹{selectedPurchase.total_amount.toFixed(2)}</span>
+                    <span className="font-medium">
+                      ₹{selectedPurchase.total_amount.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Purity</span>
-                    <span className="font-medium">{selectedPurchase.purity}</span>
+                    <span className="font-medium">
+                      {selectedPurchase.purity}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -388,7 +426,9 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
               <div className="bg-white shadow-md rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <FaCalendar className="mr-3 text-blue-600 text-xl" />
-                  <h3 className="text-lg font-semibold">Additional Information</h3>
+                  <h3 className="text-lg font-semibold">
+                    Additional Information
+                  </h3>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
@@ -405,8 +445,8 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
       )}
 
       {/* Delete Confirmation Modal */}
-      <Dialog 
-        open={isDeleteModalOpen} 
+      <Dialog
+        open={isDeleteModalOpen}
         onOpenChange={() => {
           setIsDeleteModalOpen(false);
           setSelectedPurchase(null);
@@ -416,8 +456,8 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the purchase "{selectedPurchase?.customer_name}"?
-              This action cannot be undone.
+              Are you sure you want to delete the purchase "
+              {selectedPurchase?.customer_name}"? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end space-x-2">
@@ -427,12 +467,17 @@ export function PurchaseTable({ refreshTable }: PurchaseTableProps) {
             >
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeletePurchase}
-            >
-              Delete
-            </Button>
+            <Form method="post">
+              <Input className="hidden" name="form_type" value="delete-form" />
+              <Input className="hidden" name="purchaseId" value={selectedPurchase} />
+              <Button
+                variant="destructive"
+                type="submit"
+                // onClick={handleDeletePurchase}
+              >
+                Delete
+              </Button>
+            </Form>
           </div>
         </DialogContent>
       </Dialog>
