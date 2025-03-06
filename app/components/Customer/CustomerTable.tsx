@@ -1,11 +1,11 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import {
   FaUser,
   FaPhone,
   FaIdCard,
   FaMapMarkerAlt,
-  FaAddressCard
-} from 'react-icons/fa';
+  FaAddressCard,
+} from "react-icons/fa";
 import {
   Table,
   TableBody,
@@ -20,14 +20,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription
+  DialogDescription,
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Pencil, Trash2, Eye } from 'lucide-react';
-import AddCustomerModal from '../AddCustomerModal';
-import { Form } from '@remix-run/react';
+import { Pencil, Trash2, Eye } from "lucide-react";
+import AddCustomerModal from "../AddCustomerModal";
+import { Form } from "@remix-run/react";
 
 // Comprehensive Customer interface
 interface Customer {
@@ -35,6 +35,7 @@ interface Customer {
   customer_name: string;
   address: string;
   city: string;
+  district: string;
   state: string;
   contact_no: string;
   pincode: string;
@@ -44,33 +45,33 @@ interface Customer {
 }
 
 // Type for update form fields, excluding ID
-type CustomerUpdateFields = Omit<Customer, 'id'>;
+type CustomerUpdateFields = Omit<Customer, "id">;
 
 // Type for form field keys
 type CustomerUpdateFieldKey = keyof CustomerUpdateFields;
 
-export function CustomerTable() {
+export function CustomerTable(allCustomers: any) {
   // Strongly typed state
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState<boolean>(false);
-  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
+  const [customerToDelete, setCustomerToDelete] = useState<any | null>(null);
 
   // Strongly typed update form fields
-  const [updateFormFields, setUpdateFormFields] = useState<CustomerUpdateFields>({
-    customer_name: '',
-    address: '',
-    city: '',
-    state: '',
-    contact_no: '',
-    pincode: '',
-    pan: null,
-    upi_id: null
-  });
-
-
+  const [updateFormFields, setUpdateFormFields] =
+    useState<CustomerUpdateFields>({
+      customer_name: "",
+      address: "",
+      city: "",
+      district: "",
+      state: "",
+      contact_no: "",
+      pincode: "",
+      pan: null,
+      upi_id: null,
+    });
 
   // Open customer details modal
   const handleViewDetails = (customer: Customer): void => {
@@ -84,6 +85,7 @@ export function CustomerTable() {
       customer_name: customer.customer_name,
       address: customer.address,
       city: customer.city,
+      district: customer.district,
       state: customer.state,
       contact_no: customer.contact_no,
       pincode: customer.pincode,
@@ -102,9 +104,9 @@ export function CustomerTable() {
     event: ChangeEvent<HTMLInputElement>
   ): void => {
     const value = event.target.value;
-    setUpdateFormFields(prev => ({
+    setUpdateFormFields((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -114,17 +116,15 @@ export function CustomerTable() {
   };
 
   // Prepare for customer deletion
-  const handleDeleteConfirmation = (customer: Customer): void => {
-    setCustomerToDelete(customer);
+  const handleDeleteConfirmation = (customerId: any): void => {
+    setCustomerToDelete(customerId);
     setIsDeleteModalOpen(true);
   };
 
+  console.log("all customers", allCustomers);
+
   return (
     <div className="p-4">
-
-      <div className="mb-4">
-        <AddCustomerModal onCustomerAdded={()=>{}} />
-      </div>
       <Table>
         <TableHeader>
           <TableRow>
@@ -139,15 +139,16 @@ export function CustomerTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {customers.map((customer) => (
+          {allCustomers?.data?.map((customer: any) => (
             <TableRow key={customer.id}>
-              <TableCell>{customer.customer_name}</TableCell>
+              <TableCell>{customer.name}</TableCell>
               <TableCell>{customer.address}</TableCell>
               <TableCell>{customer.contact_no}</TableCell>
               <TableCell>{customer.city}</TableCell>
               <TableCell>{customer.state}</TableCell>
               <TableCell>{customer.pincode}</TableCell>
-              <TableCell>{customer.gstin || 'N/A'}</TableCell> {/* Add this line */}
+              <TableCell>{customer.gstin || "N/A"}</TableCell>{" "}
+              {/* Add this line */}
               <TableCell>
                 <div className="flex space-x-2">
                   <Button
@@ -167,7 +168,7 @@ export function CustomerTable() {
                   <Button
                     variant="destructive"
                     size="icon"
-                    onClick={() => handleDeleteConfirmation(customer)}
+                    onClick={() => handleDeleteConfirmation(customer.id)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -176,92 +177,118 @@ export function CustomerTable() {
             </TableRow>
           ))}
         </TableBody>
-
       </Table>
 
       {/* Customer Details Modal */}
       {selectedCustomer && (
-  <Dialog open={isDetailModalOpen} onOpenChange={() => setSelectedCustomer(null)}>
-    <DialogContent className="sm:max-w-4xl">
-      <DialogHeader>
-        <DialogTitle className="text-2xl font-bold flex items-center">
-          <FaUser className="mr-3 text-blue-600" />
-          Customer Details
-        </DialogTitle>
-      </DialogHeader>
+        <Dialog
+          open={isDetailModalOpen}
+          onOpenChange={() => setSelectedCustomer(null)}
+        >
+          <DialogContent className="sm:max-w-4xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold flex items-center">
+                <FaUser className="mr-3 text-blue-600" />
+                Customer Details
+              </DialogTitle>
+            </DialogHeader>
 
-      <div className="border-b border-gray-200 my-4"></div>
+            <div className="border-b border-gray-200 my-4"></div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Personal Information Card */}
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <div className="flex items-center mb-4">
-            <FaIdCard className="mr-3 text-blue-600 text-xl" />
-            <h3 className="text-lg font-semibold">Personal Information</h3>
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Customer Name</span>
-              <span className="font-medium">{selectedCustomer.customer_name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">PAN</span>
-              <span className="font-medium">{selectedCustomer.pan || 'N/A'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">GSTIN</span>
-              <span className="font-medium">{selectedCustomer.gstin || 'N/A'}</span>
-            </div>
-          </div>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Personal Information Card */}
+              <div className="bg-white shadow-md rounded-lg p-6">
+                <div className="flex items-center mb-4">
+                  <FaIdCard className="mr-3 text-blue-600 text-xl" />
+                  <h3 className="text-lg font-semibold">
+                    Personal Information
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Customer Name</span>
+                    <span className="font-medium">
+                      {selectedCustomer.customer_name}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">PAN</span>
+                    <span className="font-medium">
+                      {selectedCustomer.pan || "N/A"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">GSTIN</span>
+                    <span className="font-medium">
+                      {selectedCustomer.gstin || "N/A"}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-        {/* Contact Details Card */}
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <div className="flex items-center mb-4">
-            <FaPhone className="mr-3 text-blue-600 text-xl" />
-            <h3 className="text-lg font-semibold">Contact Information</h3>
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Contact Number</span>
-              <span className="font-medium">{selectedCustomer.contact_no}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">UPI ID</span>
-              <span className="font-medium">{selectedCustomer.upi_id || 'N/A'}</span>
-            </div>
-          </div>
-        </div>
+              {/* Contact Details Card */}
+              <div className="bg-white shadow-md rounded-lg p-6">
+                <div className="flex items-center mb-4">
+                  <FaPhone className="mr-3 text-blue-600 text-xl" />
+                  <h3 className="text-lg font-semibold">Contact Information</h3>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Contact Number</span>
+                    <span className="font-medium">
+                      {selectedCustomer.contact_no}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">UPI ID</span>
+                    <span className="font-medium">
+                      {selectedCustomer.upi_id || "N/A"}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-        {/* Address Details Card */}
-        <div className="bg-white shadow-md rounded-lg p-6">
-          <div className="flex items-center mb-4">
-            <FaAddressCard className="mr-3 text-blue-600 text-xl" />
-            <h3 className="text-lg font-semibold">Address Information</h3>
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Full Address</span>
-              <span className="font-medium">{selectedCustomer.address}</span>
+              {/* Address Details Card */}
+              <div className="bg-white shadow-md rounded-lg p-6">
+                <div className="flex items-center mb-4">
+                  <FaAddressCard className="mr-3 text-blue-600 text-xl" />
+                  <h3 className="text-lg font-semibold">Address Information</h3>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Full Address</span>
+                    <span className="font-medium">
+                      {selectedCustomer.address}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">City</span>
+                    <span className="font-medium">{selectedCustomer.city}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">District</span>
+                    <span className="font-medium">
+                      {selectedCustomer.district}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">State</span>
+                    <span className="font-medium">
+                      {selectedCustomer.state}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Pincode</span>
+                    <span className="font-medium">
+                      {selectedCustomer.pincode}
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">City</span>
-              <span className="font-medium">{selectedCustomer.city}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">State</span>
-              <span className="font-medium">{selectedCustomer.state}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Pincode</span>
-              <span className="font-medium">{selectedCustomer.pincode}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </DialogContent>
-  </Dialog>
-)}
+          </DialogContent>
+        </Dialog>
+      )}
 
       <Dialog
         open={isUpdateModalOpen}
@@ -277,26 +304,41 @@ export function CustomerTable() {
               Update Customer
             </DialogTitle>
           </DialogHeader>
-          <Form>
+          <Form method="post">
             <div className="grid grid-cols-3 gap-5 justify-between">
-              {(Object.keys(updateFormFields) as CustomerUpdateFieldKey[])
-                .map((key) => (
+              {(Object.keys(updateFormFields) as CustomerUpdateFieldKey[]).map(
+                (key) => (
                   <div key={key} className="flex flex-col gap-2">
                     <Label htmlFor={key}>
                       {key
-                        .replace(/_/g, ' ')
-                        .replace(/\b\w/g, l => l.toUpperCase())
-                      }
+                        .replace(/_/g, " ")
+                        .replace(/\b\w/g, (l) => l.toUpperCase())}
                     </Label>
                     <Input
+                      className="hidden"
+                      name="form_type"
+                      defaultValue="update-form"
+                    />
+                    <Input
+                      className="hidden"
+                      name="customerId"
+                      defaultValue={selectedCustomer}
+                    />
+                    <Input
                       id={key}
-                      value={updateFormFields[key] ?? ''}
+                      name={key}
+                      value={updateFormFields[key] ?? ""}
                       onChange={(e) => handleUpdateInputChange(key, e)}
-                      placeholder={`Enter ${key.replace(/_/g, ' ').toLowerCase()}`}
-                      required={key !== 'upi_id' && key !== 'pan' && key !== 'gstin'} // Update this line
+                      placeholder={`Enter ${key
+                        .replace(/_/g, " ")
+                        .toLowerCase()}`}
+                      required={
+                        key !== "upi_id" && key !== "pan" && key !== "gstin"
+                      } // Update this line
                     />
                   </div>
-                ))}
+                )
+              )}
             </div>
 
             <DialogFooter className="mt-4">
@@ -309,6 +351,7 @@ export function CustomerTable() {
                 Cancel
               </Button>
               <Button
+                onClick={() => setIsUpdateModalOpen(false)}
                 type="submit"
                 className="bg-blue-600 hover:bg-blue-700"
               >
@@ -325,23 +368,31 @@ export function CustomerTable() {
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the customer "{customerToDelete?.customer_name}"?
-              This action cannot be undone.
+              Are you sure you want to delete the customer "
+              {customerToDelete?.customer_name}"? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-            
-            >
-              Delete
-            </Button>
+            <Form method="post">
+              <div className="hidden flex-col gap-2">
+                {/* <Label htmlFor="delete">Delete</Label> */}
+                <Input name="form_type" defaultValue="delete-form" />
+                <Input name="customerId" defaultValue={customerToDelete} />
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => setIsDeleteModalOpen(false)}
+                type="submit"
+                variant="destructive"
+              >
+                Delete
+              </Button>
+            </Form>
           </div>
         </DialogContent>
       </Dialog>

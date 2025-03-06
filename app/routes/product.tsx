@@ -1,6 +1,9 @@
+import { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node';
+import { useLoaderData } from '@remix-run/react';
 import React, { useState } from 'react';
 import { ProductForm } from '~/components/Product/ProductForm';
 import ProductTable from '~/components/Product/ProductTable';
+import { createProduct, deleteProductById, getAllProducts, updateProduct } from '~/data/product.server';
 
 // Mock data for products
 const mockProducts = [
@@ -41,6 +44,9 @@ const mockProducts = [
 const ProductsPage = () => {
   const [products, setProducts] = useState(mockProducts);
 
+  const productData:any = useLoaderData()
+
+
   // Mock function to simulate fetching products
   const fetchProducts = () => {
     console.log('Fetching products...');
@@ -48,7 +54,7 @@ const ProductsPage = () => {
   };
 
   // Mock function to handle product submission
-  const handleProductSubmit = async (formFields: ProductFormFields) => {
+  const handleProductSubmit = async (formFields: any) => {
     console.log('Product submitted:', formFields);
     // Simulate adding a new product to the list
     const newProduct = {
@@ -69,9 +75,34 @@ const ProductsPage = () => {
     <div className="p-5">
       <h1 className="text-2xl font-bold mb-4">Product Management</h1>
       <ProductForm onSubmit={handleProductSubmit} />
-      <ProductTable products={products} fetchProducts={fetchProducts} />
+      <ProductTable products={productData} fetchProducts={fetchProducts} />
     </div>
   );
 };
+
+export async function loader({request}:LoaderFunctionArgs) {
+  return await getAllProducts()
+}
+
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const userData = Object.fromEntries(formData);
+
+  console.log("productDetails", userData);
+
+  const formType: any = userData?.form_type;
+
+  if (formType === "create-form") {
+    return createProduct(userData);
+  }else if(formType === "delete-form"){
+    return deleteProductById(Number(userData.productId))
+  }
+  else if(formType === "update-form") {
+    return updateProduct(userData, Number(userData.customerId));
+  }
+
+}
+
 
 export default ProductsPage;
