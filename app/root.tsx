@@ -10,6 +10,7 @@ import type { LinksFunction } from "@remix-run/node";
 import "./tailwind.css";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
+import { ToastProvider } from "./components/ui/toast";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -52,7 +53,9 @@ export default function App() {
             <Sidebar />
           </div>
           <div className="flex-1 h-screen">
-            <Outlet />
+          <ToastProvider>
+          <Outlet />
+        </ToastProvider>
           </div>
         </div>
       </div>

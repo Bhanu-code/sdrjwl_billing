@@ -7,6 +7,35 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 
+
+// Database Connection Test code
+
+// import { LoaderFunction } from "@remix-run/node";
+// import { prisma } from "~/data/database.server";
+
+// export const loader: LoaderFunction = async () => {
+//   try {
+//     // Attempt a simple database query to verify connection
+//     const connectionTest = await prisma.$queryRaw`SELECT 1`;
+    
+//     console.log('✅ Database Connection Successful!');
+    
+//     return {
+//       status: 'connected',
+//       message: 'Database is ready and responsive',
+//       timestamp: new Date().toISOString()
+//     };
+//   } catch (error) {
+//     console.error('❌ Database Connection Failed:', error);
+    
+//     return {
+//       status: 'error',
+//       message: 'Could not establish database connection',
+//       details: error.message
+//     };
+//   }
+// };
+
 import '../index.css'
 
 export const meta: MetaFunction = () => {
