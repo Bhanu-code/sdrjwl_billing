@@ -400,13 +400,24 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
               Update Product
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmitUpdate}>
+          <Form method="post">
             <div className="grid grid-cols-3 gap-5 justify-between">
               {/* Product Name */}
               <div className="flex flex-col gap-2">
+                <Input
+                  className="hidden"
+                  name="form_type"
+                  defaultValue="update-form"
+                />
+                <Input
+                  className="hidden"
+                  name="productId"
+                  defaultValue={updateFormFields?.id}
+                />
                 <Label htmlFor="product_name">Product Name</Label>
                 <Input
                   id="product_name"
+                  name="product_name"
                   value={updateFormFields.product_name || ""}
                   onChange={(e) =>
                     handleUpdateInputChange("product_name", e.target.value)
@@ -421,6 +432,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="gross_weight">Gross Weight (gm)</Label>
                 <Input
                   id="gross_weight"
+                  name="gross_weight"
                   type="number"
                   value={updateFormFields.gross_weight || ""}
                   onChange={(e) =>
@@ -436,6 +448,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="net_weight">Net Weight (gm)</Label>
                 <Input
                   id="net_weight"
+                  name="net_weight"
                   type="number"
                   value={updateFormFields.net_weight || ""}
                   onChange={(e) =>
@@ -451,6 +464,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="hsn_code">HSN Code</Label>
                 <Input
                   id="hsn_code"
+                  name="hsn_code"
                   value={updateFormFields.hsn_code || ""}
                   onChange={(e) =>
                     handleUpdateInputChange("hsn_code", e.target.value)
@@ -465,6 +479,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="sales_rate">Sales Rate</Label>
                 <Input
                   id="sales_rate"
+                  name="sales_rate"
                   type="number"
                   value={updateFormFields.sales_rate || ""}
                   onChange={(e) =>
@@ -480,6 +495,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="unit">Unit</Label>
                 <Input
                   id="unit"
+                  name="unit"
                   value={updateFormFields.unit || ""}
                   onChange={(e) =>
                     handleUpdateInputChange("unit", e.target.value)
@@ -495,6 +511,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Input
                   id="making_charges"
                   type="number"
+                  name="making_charges"
                   value={updateFormFields.making_charges || ""}
                   onChange={(e) =>
                     handleUpdateInputChange("making_charges", e.target.value)
@@ -509,6 +526,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="huid_no">HUID No. (Optional)</Label>
                 <Input
                   id="huid_no"
+                  name="huid_no"
                   value={updateFormFields.huid_no || ""}
                   onChange={(e) =>
                     handleUpdateInputChange("huid_no", e.target.value)
@@ -521,6 +539,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="hallmark_no">Hallmark No. (Optional)</Label>
                 <Input
                   id="hallmark_no"
+                  name="hallmark_no"
                   value={updateFormFields.hallmark_no || ""}
                   onChange={(e) =>
                     handleUpdateInputChange("hallmark_no", e.target.value)
@@ -533,6 +552,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="other_charges">Other Charges (Optional)</Label>
                 <Input
                   id="other_charges"
+                  name="other_charges"
                   type="number"
                   value={updateFormFields.other_charges || ""}
                   onChange={(e) =>
@@ -552,11 +572,15 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
               >
                 Cancel
               </Button>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+              <Button
+                onClick={() => setIsUpdateModalOpen(false)}
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700"
+              >
                 Update Product
               </Button>
             </DialogFooter>
-          </form>
+          </Form>
         </DialogContent>
       </Dialog>
 

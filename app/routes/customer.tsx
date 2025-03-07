@@ -27,8 +27,6 @@ export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const userData = Object.fromEntries(formData);
 
-  console.log(userData);
-
   const formType: any = userData?.form_type;
 
   if (formType === "add-form") {
@@ -36,8 +34,7 @@ export async function action({ request }: ActionFunctionArgs) {
   } else if(formType === "delete-form"){
     return deleteCustomerById(Number(userData.customerId))
   }
-  else {
-    console.log("update trigger")
+  else if(formType === "update-form"){
     return updateCustomer(userData, Number(userData.customerId));
   }
 
