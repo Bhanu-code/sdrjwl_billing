@@ -45,7 +45,7 @@ export async function action({ request }: ActionFunctionArgs) {
   if (formType === "create-form") {
     return createPurchase(userData);
   } else if(formType === "delete-form"){
-    return deletePurchaseById(Number(userData.productId))
+    return deletePurchaseById(Number(userData.purchaseId))
   }
   // else if(formType === "update-form") {
   //   return updateProduct(userData, Number(userData.customerId));

@@ -99,7 +99,9 @@ export async function action({ request }: ActionFunctionArgs) {
     return deleteProductById(Number(userData.productId))
   }
   else if(formType === "update-form") {
-    return updateProduct(userData, Number(userData.customerId));
+    console.log("updated triggered")
+    console.log("product Data", userData)
+    return updateProduct(userData, Number(userData.productId));
   }
 
 }

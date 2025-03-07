@@ -279,7 +279,7 @@ export function PurchaseTable({ refreshTable }: any) {
                         (total, purchase) => total + purchase.total_amount,
                         0
                       )
-                      .toFixed(2)}
+                      }
                       
                   </TableCell>
                   <TableCell colSpan={2}></TableCell>
@@ -404,13 +404,13 @@ export function PurchaseTable({ refreshTable }: any) {
                   <div className="flex justify-between">
                     <span className="text-gray-500">Gold Rate</span>
                     <span className="font-medium">
-                      ₹{selectedPurchase.gold_rate.toFixed(2)}
+                      ₹{selectedPurchase.gold_rate}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Total Amount</span>
                     <span className="font-medium">
-                      ₹{selectedPurchase.total_amount.toFixed(2)}
+                      ₹{selectedPurchase.total_amount}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -473,6 +473,7 @@ export function PurchaseTable({ refreshTable }: any) {
               <Button
                 variant="destructive"
                 type="submit"
+                onClick={() => setIsDeleteModalOpen(false)}
                 // onClick={handleDeletePurchase}
               >
                 Delete
