@@ -12,7 +12,36 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { createSalesPOS, getSalesPOSData } from "~/data/salesPOS.server";
+import { createSalesPOS, getSalesPOSData, deleteSalesPOS } from "~/data/salesPOS.server";
+import SalesPOSTable from "~/components/SalesPOSTable"; // Import the SalesPOSTable component
+import { z } from "zod";
+
+// Define a schema for validating the form data
+const SalesPOSFormSchema = z.object({
+  contact_number: z.string(),
+  customer_id: z.string(),
+  customer_name: z.string(),
+  gstin_no: z.string(),
+  product_code: z.string(),
+  product_name: z.string(),
+  live_rate: z.string().transform((val) => val !== "manual"), // Convert string to boolean
+  gold_price: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
+  manual_rate: z.string().optional().transform((val) => val ? parseFloat(val) : undefined), 
+  unit: z.string(),
+  net_weight: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
+  making_charges: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
+  sales_total: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
+  discount_percent: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
+  total_rate: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
+  gst_type: z.string(),
+  total_amount: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
+  barcode_number: z.string(),
+  other_charges: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
+  reference: z.string(),
+  pay_mode: z.string(),
+  cash_adjustment: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
+  master_entry_rate: z.string().optional().transform((val) => val ? parseFloat(val) : undefined), // Convert string to number or undefined
+});
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const salesPOSData = await getSalesPOSData();
@@ -25,12 +54,36 @@ export async function action({ request }: ActionFunctionArgs) {
 
   switch (intent) {
     case "create": {
-      const salesPOSData = Object.fromEntries(formData);
-      const createdPOS = await createSalesPOS(salesPOSData);
-      return json({ createdPOS });
+      try {
+        // Parse and validate the form data
+        const rawData = Object.fromEntries(formData);
+        console.log("Raw form data:", rawData);
+        const parsedData = SalesPOSFormSchema.parse(rawData);
+        console.log("Parsed data:", parsedData);
+
+        // Create the sales POS entry
+        const createdPOS = await createSalesPOS(parsedData);
+        return json({ createdPOS, success: true });
+      } catch (error) {
+        console.error("Error creating sales POS:", error);
+        return json({ error: error.message || "Failed to create sales POS entry", success: false }, { status: 400 });
+      }
+    }
+    case "delete": {
+      try {
+        const id = formData.get("id");
+        if (!id) {
+          return json({ error: "ID is required", success: false }, { status: 400 });
+        }
+        await deleteSalesPOS(Number(id));
+        return json({ success: true });
+      } catch (error) {
+        console.error("Error deleting sales POS:", error);
+        return json({ error: error.message || "Failed to delete sales POS entry", success: false }, { status: 400 });
+      }
     }
     default:
-      return json({ error: "Invalid intent" }, { status: 400 });
+      return json({ error: "Invalid intent", success: false }, { status: 400 });
   }
 }
 
@@ -41,13 +94,13 @@ const SalesPOS = () => {
 
   // State variables for form inputs
   const [contactNumber, setContactNumber] = useState<string>("");
-  const [customerId, setCustomerId] = useState<string>("");
+  const [customerId, setCustomerId] = useState<string>("CUST-" + Date.now()); // Generate a default customer ID
   const [customerName, setCustomerName] = useState<string>("");
   const [gstNo, setGstNo] = useState<string>("");
   const [productCode, setProductCode] = useState<string>("");
   const [productName, setProductName] = useState<string>("");
   const [gstType, setGstType] = useState<string>("gst"); // Default to "gst"
-  const [liveRate, setLiveRate] = useState<string>("");
+  const [liveRate, setLiveRate] = useState<string>("gold_24k"); // Default to gold_24k
   const [manualRate, setManualRate] = useState<string>("");
   const [netWeight, setNetWeight] = useState<number>(0);
   const [makingCharges, setMakingCharges] = useState<number>(0);
@@ -59,11 +112,36 @@ const SalesPOS = () => {
   const [percentageValue, setPercentageValue] = useState<number>(0);
   const [otherCharges, setOtherCharges] = useState<number>(0);
   const [reference, setReference] = useState<string>("");
-  const [payMode, setPayMode] = useState<string>("");
+  const [payMode, setPayMode] = useState<string>("cash"); // Default to "cash"
   const [cashAdjustment, setCashAdjustment] = useState<number>(0);
   const [barcodeNumber, setBarcodeNumber] = useState<string>("");
-  const [selectedLiveRatePrice, setSelectedLiveRatePrice] = useState<number>(0);
+  const [selectedLiveRatePrice, setSelectedLiveRatePrice] = useState<number>(6000); // Default rate
   const [baseCalculation, setBaseCalculation] = useState<string>("");
+  const [goldPrice, setGoldPrice] = useState<number>(6000); // Default gold price
+
+  // Set default live rate prices - in a real app, these would come from an API or database
+  const liveRatePrices = {
+    gold_24k: 6000,
+    gold_22k: 5500,
+    gold_18k: 4500,
+    gold_16k: 4000,
+    silver_pure: 800,
+    silver_ornamental: 900,
+    manual: 0 // This will be overridden by manual input
+  };
+
+  // Update selected live rate price when live rate option changes
+  useEffect(() => {
+    if (liveRate !== "manual") {
+      const price = liveRatePrices[liveRate] || 0;
+      setSelectedLiveRatePrice(price);
+      setGoldPrice(price);
+    } else if (manualRate) {
+      const parsedRate = parseFloat(manualRate);
+      setSelectedLiveRatePrice(parsedRate);
+      setGoldPrice(parsedRate);
+    }
+  }, [liveRate, manualRate]);
 
   // Calculate sales total
   const calculateSalesTotal = () => {
@@ -137,7 +215,7 @@ const SalesPOS = () => {
   // Recalculate whenever dependencies change
   useEffect(() => {
     calculateSalesTotal();
-  }, [liveRate, manualRate, netWeight, makingCharges, unit, percentageValue]);
+  }, [liveRate, manualRate, netWeight, makingCharges, unit, percentageValue, selectedLiveRatePrice]);
 
   useEffect(() => {
     calculateTotalRate();
@@ -148,9 +226,38 @@ const SalesPOS = () => {
   }, [totalRate, otherCharges, gstType, cashAdjustment]);
 
   const handlePOSCreated = () => {
-    setIsOpen(false);
-    fetcher.load("/sales-pos");
+    // Only close the dialog if the submission was successful
+    if (fetcher.state === "idle" && fetcher.data?.success) {
+      setIsOpen(false);
+      // Reset form values for next entry
+      setContactNumber("");
+      setCustomerId("CUST-" + Date.now());
+      setCustomerName("");
+      setGstNo("");
+      setProductCode("");
+      setProductName("");
+      setBarcodeNumber("");
+      setNetWeight(0);
+      setMakingCharges(0);
+      setDiscountPercent(0);
+      setOtherCharges(0);
+      setReference("");
+      setCashAdjustment(0);
+    }
   };
+
+  // Monitor fetcher state for form submission results
+  useEffect(() => {
+    if (fetcher.state === "idle" && fetcher.data) {
+      if (fetcher.data.success) {
+        console.log("POS created successfully:", fetcher.data.createdPOS);
+        handlePOSCreated();
+      } else if (fetcher.data.error) {
+        console.error("Error creating POS:", fetcher.data.error);
+        // Here you could display an error message to the user
+      }
+    }
+  }, [fetcher.state, fetcher.data]);
 
   return (
     <div className="m-4">
@@ -163,12 +270,15 @@ const SalesPOS = () => {
             <DialogHeader>
               <DialogTitle className="text-blue-700">Create POS</DialogTitle>
             </DialogHeader>
-            <fetcher.Form method="POST" onSubmit={handlePOSCreated}>
+            <fetcher.Form method="POST">
               <div className="grid grid-cols-4 gap-5 justify-between">
                 {/* Customer Information Section */}
                 <div className="col-span-4">
                   <h3 className="text-lg font-semibold mb-3">Customer Information</h3>
                   <div className="grid grid-cols-3 gap-4">
+                    {/* Hidden Customer ID */}
+                    <input type="hidden" name="customer_id" value={customerId} />
+                    
                     {/* Contact Number */}
                     <div className="flex flex-col gap-1 items-start justify-between">
                       <Label htmlFor="contact_no" className="text-right text-sm">
@@ -235,9 +345,10 @@ const SalesPOS = () => {
                       />
                     </div>
 
+
                     {/* Product Name */}
                     <div className="flex flex-col gap-1 items-start justify-between">
-                      <Label htmlFor="product_name" className="text-right text-sm">
+                    <Label htmlFor="product_name" className="text-right text-sm">
                         Product Name
                       </Label>
                       <Input
@@ -271,6 +382,9 @@ const SalesPOS = () => {
                 <div className="col-span-4">
                   <h3 className="text-lg font-semibold mb-3">Pricing and Charges</h3>
                   <div className="grid grid-cols-3 gap-4">
+                    {/* Hidden gold_price field - this is critical! */}
+                    <input type="hidden" name="gold_price" value={goldPrice} />
+                    
                     {/* Live Rate Selection */}
                     <div className="flex flex-col gap-1 items-start justify-between">
                       <Label htmlFor="live_rate" className="text-right text-sm">
@@ -283,12 +397,12 @@ const SalesPOS = () => {
                         onChange={(e) => setLiveRate(e.target.value)}
                         className="w-full p-2 border rounded"
                       >
-                        <option value="gold_24k">Gold 24K</option>
-                        <option value="gold_22k">Gold 22K</option>
-                        <option value="gold_18k">Gold 18K</option>
-                        <option value="gold_16k">Gold 16K</option>
-                        <option value="silver_pure">Silver Pure</option>
-                        <option value="silver_ornamental">Silver Ornamental</option>
+                        <option value="gold_24k">Gold 24K (₹{liveRatePrices.gold_24k}/g)</option>
+                        <option value="gold_22k">Gold 22K (₹{liveRatePrices.gold_22k}/g)</option>
+                        <option value="gold_18k">Gold 18K (₹{liveRatePrices.gold_18k}/g)</option>
+                        <option value="gold_16k">Gold 16K (₹{liveRatePrices.gold_16k}/g)</option>
+                        <option value="silver_pure">Silver Pure (₹{liveRatePrices.silver_pure}/g)</option>
+                        <option value="silver_ornamental">Silver Ornamental (₹{liveRatePrices.silver_ornamental}/g)</option>
                         <option value="manual">Manual Entry</option>
                       </select>
                     </div>
@@ -370,7 +484,7 @@ const SalesPOS = () => {
                         name="net_weight"
                         type="number"
                         value={netWeight}
-                        onChange={(e) => setNetWeight(parseFloat(e.target.value))}
+                        onChange={(e) => setNetWeight(parseFloat(e.target.value) || 0)}
                         placeholder="net weight"
                         className="col-span-3"
                       />
@@ -386,7 +500,7 @@ const SalesPOS = () => {
                         name="making_charges"
                         type="number"
                         value={makingCharges}
-                        onChange={(e) => setMakingCharges(parseFloat(e.target.value))}
+                        onChange={(e) => setMakingCharges(parseFloat(e.target.value) || 0)}
                         placeholder="making charges"
                         className="col-span-3"
                       />
@@ -401,9 +515,9 @@ const SalesPOS = () => {
                         id="sales_total"
                         name="sales_total"
                         value={salesTotal.toFixed(2)}
-                        disabled
                         placeholder="Calculated Total"
                         className="col-span-3"
+                        readOnly
                       />
                     </div>
 
@@ -483,7 +597,7 @@ const SalesPOS = () => {
                         name="discount_percent"
                         type="number"
                         value={discountPercent}
-                        onChange={(e) => setDiscountPercent(parseFloat(e.target.value))}
+                        onChange={(e) => setDiscountPercent(parseFloat(e.target.value) || 0)}
                         placeholder="discount percentage"
                         className="col-span-3"
                       />
@@ -498,9 +612,9 @@ const SalesPOS = () => {
                         id="total_rate"
                         name="total_rate"
                         value={totalRate.toFixed(2)}
-                        disabled
                         placeholder="calculated total rate"
                         className="col-span-3"
+                        readOnly
                       />
                     </div>
 
@@ -514,7 +628,7 @@ const SalesPOS = () => {
                         name="other_charges"
                         type="number"
                         value={otherCharges}
-                        onChange={(e) => setOtherCharges(parseFloat(e.target.value))}
+                        onChange={(e) => setOtherCharges(parseFloat(e.target.value) || 0)}
                         placeholder="Enter other charges"
                         className="col-span-3"
                       />
@@ -565,7 +679,7 @@ const SalesPOS = () => {
                         name="cash_adjustment"
                         type="number"
                         value={cashAdjustment}
-                        onChange={(e) => setCashAdjustment(parseFloat(e.target.value))}
+                        onChange={(e) => setCashAdjustment(parseFloat(e.target.value) || 0)}
                         placeholder="Enter cash adjustment"
                         className="col-span-3"
                       />
@@ -580,9 +694,9 @@ const SalesPOS = () => {
                         id="total_amt"
                         name="total_amount"
                         value={totalAmount.toFixed(2)}
-                        disabled
                         placeholder="total amount"
                         className="col-span-3"
+                        readOnly
                       />
                     </div>
                   </div>
@@ -590,21 +704,27 @@ const SalesPOS = () => {
               </div>
 
               <DialogFooter>
-                <Button
-                  className="bg-blue-600"
-                  type="submit"
-                  name="intent"
-                  value="create"
-                >
-                  Create
-                </Button>
+                {fetcher.state === "submitting" ? (
+                  <Button disabled className="bg-blue-600">
+                    Creating...
+                  </Button>
+                ) : (
+                  <Button
+                    className="bg-blue-600"
+                    type="submit"
+                    name="intent"
+                    value="create"
+                  >
+                    Create
+                  </Button>
+                )}
               </DialogFooter>
             </fetcher.Form>
           </DialogContent>
         </Dialog>
       </div>
       <div className="data-table">
-        {/* Render your POS table here */}
+        <SalesPOSTable data={salesPOSData} />
       </div>
     </div>
   );

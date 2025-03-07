@@ -1,5 +1,4 @@
-import  { useState, useEffect } from 'react';
-// import { invoke } from '@tauri-apps/api/core';
+import { useEffect, useState } from 'react';
 import { 
   FaEye, 
   FaTrash,
@@ -27,13 +26,11 @@ import {
   DialogFooter
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
-import { Label } from '@radix-ui/react-label';
-import { Input } from './ui/input';
+import { Label } from "~/components/ui/label";
+import { Input } from "~/components/ui/input";
 import { useToast } from "~/components/ui/toast";
 import InvoiceModal from '~/components/InvoiceModal';
-
-
-
+import { useFetcher } from '@remix-run/react';
 
 // Define the type for SalesPOS based on the Rust struct
 interface SalesPOS {
@@ -59,44 +56,25 @@ interface SalesPOS {
 }
 
 interface POSTableProps {
-  refreshTable: boolean;
+  data: SalesPOS[];
 }
 
-export function SalesPOSTable({ refreshTable }: POSTableProps) {
-  const [salesPos, setSalesPOS] = useState<SalesPOS[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export function SalesPOSTable({ data }: POSTableProps) {
+  const [salesPos, setSalesPOS] = useState<SalesPOS[]>(data || []);
   const [selectedSale, setSelectedSale] = useState<SalesPOS | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const { toast } = useToast();
+  const fetcher = useFetcher();
   
-
   const [updateFormData, setUpdateFormData] = useState<Partial<SalesPOS>>({});
 
-  const fetchSalesPOS = async () => {
-    // try {
-    //   const data = await invoke<SalesPOS[]>('get_sales_pos');
-    //   setSalesPOS(data);
-    //   setLoading(false);
-    // } catch (err) {
-    //   setError(err instanceof Error ? err.message : String(err));
-    //   setLoading(false);
-    // }
-  };
-
-  useEffect(() => {
-    fetchSalesPOS();
-  }, [refreshTable]); 
   const calculateGSTDetails = (sale: SalesPOS) => {
-    // Calculate taxable value (total before GST)
     const taxableValue = sale.total_rate;
     
-    // GST Calculation Logic
     if (sale.gst_type === 'gst') {
-      // For CGST & SGST (Intra-state supply)
       const cgstRate = 0.015; // 1.5%
       const sgstRate = 0.015; // 1.5%
       
@@ -113,7 +91,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
         totalAmount: taxableValue + cgstAmount + sgstAmount
       };
     } else {
-      // For IGST (Inter-state supply)
       const igstRate = 0.03; // 3%
       
       const igstAmount = taxableValue * igstRate;
@@ -133,7 +110,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
     setIsPrintModalOpen(true);
   };
 
-  // Handler for update form changes
   const handleUpdateFormChange = (field: keyof SalesPOS, value: string | number) => {
     setUpdateFormData(prev => ({
       ...prev,
@@ -141,84 +117,105 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
     }));
   };
 
-  // Handler for update submission
-  const handleUpdateSubmit = async () => {
+  const handleUpdateSubmit = () => {
     if (!selectedSale) return;
 
-    try {
-      // Implement update logic using Tauri invoke
-      // This is a placeholder - you'll need to implement the actual update backend function
-      console.log('Updating sale:', {
-        ...selectedSale,
-        ...updateFormData
-      });
+    fetcher.submit(
+      { 
+        ...updateFormData, 
+        id: selectedSale.id?.toString() || "", 
+        intent: "update" 
+      },
+      { method: "POST" }
+    );
 
-      // Refresh sales list or update specific sale in the list
+    // Close the modal only if the submission was successful
+    if (fetcher.state === "idle" && !fetcher.data?.error) {
       setIsUpdateModalOpen(false);
-    } catch (error) {
-      console.error('Failed to update sale:', error);
+      toast({
+        title: "Success",
+        description: "Sale updated successfully",
+      });
+      
+      // Update the local state if the submission was successful
+      if (selectedSale.id) {
+        setSalesPOS(prevSales => 
+          prevSales.map(sale => 
+            sale.id === selectedSale.id ? { ...sale, ...updateFormData } : sale
+          )
+        );
+      }
     }
   };
 
-  // Handler to open delete confirmation modal
   const handleOpenDeleteModal = (sale: SalesPOS) => {
     setSelectedSale(sale);
     setIsDeleteModalOpen(true);
   };
 
-  // Handler for delete confirmation
-  const handleDeleteConfirm = async () => {
-    if (!selectedSale) return;
+  const handleDeleteConfirm = () => {
+    if (!selectedSale || !selectedSale.id) return;
   
-    // try {
-    //   // Pass an object with product_code matching the backend expectation
-    //   await invoke('delete_sales_pos', { 
-    //     params: {
-    //       product_code: selectedSale.product_code 
-    //     }
-    //   });
-      
-    //   // Remove the sale from the local state
-    //   setSalesPOS(salesPos.filter(s => s.product_code !== selectedSale.product_code));
-      
-    //   // Close the delete modal
-    //   setIsDeleteModalOpen(false);
-      
-    //   // Show success toast
-    //   toast({
-    //     title: "Success",
-    //     description: "Sale deleted successfully",
-    //     variant: "success"
-    //   });
-    // } catch (error) {
-    //   console.error('Failed to delete sale:', error);
-      
-    //   // Show error toast
-    //   toast({
-    //     title: "Error",
-    //     description: "Failed to delete sale",
-    //     variant: "destructive"
-    //   });
-    // }
+    fetcher.submit(
+      { 
+        id: selectedSale.id.toString(), 
+        intent: "delete" 
+      },
+      { method: "POST" }
+    );
   };
-
-  // Handler to open detail modal
+  
+  // Add this useEffect to handle the fetcher state changes
+  useEffect(() => {
+    if (fetcher.state === "idle" && fetcher.data && !fetcher.data.error && selectedSale) {
+      // Only update if fetcher has completed and returned success
+      if (fetcher.data.success && selectedSale.id) {
+        // Update the local state
+        setSalesPOS(prevSales => prevSales.filter(sale => sale.id !== selectedSale.id));
+        
+        // Close the modal
+        setIsDeleteModalOpen(false);
+        
+        // Show success toast
+        toast({
+          title: "Success",
+          description: "Sale deleted successfully",
+        });
+      } else if (fetcher.data.error) {
+        // Show error toast
+        toast({
+          title: "Error",
+          description: fetcher.data.error || "Failed to delete sale",
+          variant: "destructive"
+        });
+      }
+    }
+  }, [fetcher.state, fetcher.data, selectedSale]);
   const handleViewDetails = (sale: SalesPOS) => {
     setSelectedSale(sale);
     setIsDetailModalOpen(true);
   };
 
+  const handleOpenUpdateModal = (sale: SalesPOS) => {
+    setSelectedSale(sale);
+    setUpdateFormData({
+      contact_number: sale.contact_number,
+      customer_name: sale.customer_name,
+      gstin_no: sale.gstin_no,
+      product_name: sale.product_name,
+      net_weight: sale.net_weight,
+      making_charges: sale.making_charges,
+      discount_percent: sale.discount_percent
+    });
+    setIsUpdateModalOpen(true);
+  };
 
-  // Calculate total amount
   const totalAmount = salesPos.reduce((sum, sale) => sum + sale.total_amount, 0);
 
-  if (loading) {
-    return <div>Loading sales data...</div>;
+  if (!data || data.length === 0) {
+    return <div>No sales data available.</div>;
   }
 
-  if (error) {
-    return <div>Error loading sales data: {error}</div>;
-  }
 
   return (
     <>
@@ -245,7 +242,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
               <TableCell>{new Date(sale.created_at).toLocaleString()}</TableCell>
               <TableCell>
               <div className="flex space-x-2">
-                  {/* View Details Button */}
                   <Button 
                     variant="outline" 
                     size="icon" 
@@ -255,7 +251,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
                     <FaEye className="h-4 w-4" />
                   </Button>
                   
-                  {/* Print Invoice Button */}
                   <Button 
                     variant="outline" 
                     size="icon" 
@@ -265,7 +260,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
                     <FaPrint className="h-4 w-4" />
                   </Button>
                   
-                  {/* Delete Button */}
                   <Button 
                     variant="destructive" 
                     size="icon" 
@@ -289,7 +283,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
         </TableFooter>
       </Table>
 
-      {/* Detail Modal */}
       {selectedSale && (
         <Dialog 
           open={isDetailModalOpen} 
@@ -309,7 +302,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
             <div className="border-b border-gray-200 my-4"></div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Customer Information Card */}
               <div className="bg-white shadow-md rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <FaUser className="mr-3 text-blue-600 text-xl" />
@@ -331,7 +323,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
                 </div>
               </div>
 
-              {/* Product Details Card */}
               <div className="bg-white shadow-md rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <FaShoppingBag className="mr-3 text-blue-600 text-xl" />
@@ -353,7 +344,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
                 </div>
               </div>
 
-              {/* Financial Details Card */}
               <div className="bg-white shadow-md rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <FaMoneyBillWave className="mr-3 text-blue-600 text-xl" />
@@ -375,7 +365,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
                 </div>
               </div>
 
-              {/* GST Details Card */}
               <div className="bg-white shadow-md rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <FaReceipt className="mr-3 text-blue-600 text-xl" />
@@ -454,7 +443,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
           </DialogHeader>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Contact Number */}
             <div>
               <Label>Contact Number</Label>
               <Input 
@@ -463,7 +451,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
               />
             </div>
 
-            {/* Customer Name */}
             <div>
               <Label>Customer Name</Label>
               <Input 
@@ -472,7 +459,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
               />
             </div>
 
-            {/* GSTIN No */}
             <div>
               <Label>GSTIN No</Label>
               <Input 
@@ -481,7 +467,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
               />
             </div>
 
-            {/* Product Name */}
             <div>
               <Label>Product Name</Label>
               <Input 
@@ -490,7 +475,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
               />
             </div>
 
-            {/* Net Weight */}
             <div>
               <Label>Net Weight</Label>
               <Input 
@@ -500,7 +484,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
               />
             </div>
 
-            {/* Making Charges */}
             <div>
               <Label>Making Charges</Label>
               <Input 
@@ -510,7 +493,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
               />
             </div>
 
-            {/* Discount Percent */}
             <div>
               <Label>Discount Percent</Label>
               <Input 
@@ -535,7 +517,6 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Modal */}
       <Dialog 
         open={isDeleteModalOpen} 
         onOpenChange={setIsDeleteModalOpen}
@@ -565,13 +546,13 @@ export function SalesPOSTable({ refreshTable }: POSTableProps) {
         </DialogContent>
       </Dialog>
 
-      {selectedSale && (
+       {selectedSale && (
         <InvoiceModal 
           isOpen={isPrintModalOpen}
           onOpenChange={setIsPrintModalOpen}
           saleData={selectedSale}
         />
-      )}
+      )} 
 
     </>
   );

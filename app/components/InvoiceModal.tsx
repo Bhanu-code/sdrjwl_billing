@@ -5,8 +5,8 @@ import {
   DialogContent,
   DialogFooter,
 } from "./ui/dialog";
-import { usePDF } from "react-to-pdf";
-// import { invoke } from '@tauri-apps/api/core';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 // Define the SalesPOS interface to resolve type errors
 interface SalesPOS {
@@ -55,9 +55,6 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   onOpenChange, 
   saleData 
 }) => {
-  // Create a ref for the printable content (remove unused useRef import)
-  const { toPDF, targetRef } = usePDF({ filename: `Invoice_${saleData.product_code}.pdf` });
-
   // Company static details
   const [companyDetails, setCompanyDetails] = useState<CompanyInvoiceDetails>({
     company_name: "Company Name",
@@ -68,30 +65,12 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
   useEffect(() => {
     const fetchCompanyDetails = async () => {
-    //   try {
-    //     // Type assertion to tell TypeScript about the expected structure
-    //     const details = await invoke('get_company_invoice_details') as {
-    //       company_name: string;
-    //       address: string;
-    //       gstin_no: string;
-    //       bis_reg_no: string;
-    //     };
-        
-    //     // Update state with fetched details, using fallback values
-    //     setCompanyDetails({
-    //       company_name: details.company_name || "Company Name",
-    //       address: details.address || "Company Address",
-    //       gstin_no: details.gstin_no || "GSTIN Not Available",
-    //       bis_reg_no: details.bis_reg_no || "BIS Reg Not Available"
-    //     });
-    //   } catch (error) {
-    //     console.error('Failed to fetch company details:', error);
-    //     // Fallback values already set in initial state
-    //   }
+      // Fetch company details logic here
     };
 
     fetchCompanyDetails();
   }, []);
+
   // Calculate GST details 
   const calculateGSTDetails = (sale: SalesPOS): GSTDetails => {
     const taxableValue = sale.total_rate;
@@ -152,10 +131,33 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     return inWords(Math.floor(num)).trim() + " rupees";
   };
 
+  // Function to handle PDF generation
+  const handleDownloadPDF = () => {
+    const input = document.getElementById('invoice-content');
+    if (input) {
+      // Increase the scale for better resolution
+      html2canvas(input, { scale: 2 }).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgWidth = 210; // A4 width in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        // Calculate the height to fit the content on a single page 
+        const pageHeight = (imgHeight * imgWidth) / canvas.width;
+        
+        // Add the image to the PDF
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        
+        // Save the PDF
+        pdf.save(`Invoice_${saleData.product_code}.pdf`);
+      });
+    }
+  };
+
   return (
-<Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[1000px] h-4/5 overflow-y-auto">
-        <div ref={targetRef} className="invoice p-4">
+        <div id="invoice-content" className="invoice p-4">
           {/* Header */}
           <div className="header flex justify-between p-2 text-blue-500 border-[1px] border-slate-900">
             <div className="left calistoga-regular">
@@ -299,7 +301,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
           <Button 
             className="bg-blue-600" 
             type="button" 
-            onClick={() => toPDF()}
+            onClick={handleDownloadPDF}
           >
             Download Invoice PDF
           </Button>

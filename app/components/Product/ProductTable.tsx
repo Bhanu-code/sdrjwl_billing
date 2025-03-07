@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -6,8 +6,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '~/components/ui/table';
-import { Button } from '~/components/ui/button';
+} from "~/components/ui/table";
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -15,12 +15,22 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '~/components/ui/dialog';
-import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
-import { Edit2, Trash2, Eye, Package, Tag, Ruler, DollarSign, BarcodeIcon } from 'lucide-react';
-import { useToast } from '~/components/ui/toast';
-import Barcode from '~/components/barcode';
+} from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import {
+  Edit2,
+  Trash2,
+  Eye,
+  Package,
+  Tag,
+  Ruler,
+  DollarSign,
+  BarcodeIcon,
+} from "lucide-react";
+import { useToast } from "~/components/ui/toast";
+import Barcode from "~/components/barcode";
+import { Form } from "@remix-run/react";
 
 // Type definition for Product
 type Product = {
@@ -46,11 +56,13 @@ interface TableDemoProps {
 }
 
 export function ProductTable({ products, fetchProducts }: TableDemoProps) {
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
-  const [updateFormFields, setUpdateFormFields] = useState<Partial<Product>>({});
+  const [productToDelete, setProductToDelete] = useState<any | null>(null);
+  const [updateFormFields, setUpdateFormFields] = useState<Partial<Product>>(
+    {}
+  );
   const { toast } = useToast();
 
   // Handler for deleting a product
@@ -59,21 +71,21 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
 
     try {
       // Simulate a delete operation
-      console.log('Deleting product:', productToDelete.id);
+      console.log("Deleting product:", productToDelete.id);
       toast({
-        title: 'Success',
-        description: 'Product deleted successfully',
-        variant: 'success',
+        title: "Success",
+        description: "Product deleted successfully",
+        variant: "success",
       });
       fetchProducts(); // Refresh the product list
       setIsDeleteModalOpen(false);
       setProductToDelete(null);
     } catch (error) {
-      console.error('Failed to delete product:', error);
+      console.error("Failed to delete product:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to delete product',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to delete product",
+        variant: "destructive",
       });
     }
   };
@@ -116,21 +128,21 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
 
     try {
       // Simulate an update operation
-      console.log('Updating product:', updateFormFields);
+      console.log("Updating product:", updateFormFields);
       toast({
-        title: 'Success',
-        description: 'Product updated successfully',
-        variant: 'success',
+        title: "Success",
+        description: "Product updated successfully",
+        variant: "success",
       });
       fetchProducts(); // Refresh the product list
       setIsUpdateModalOpen(false);
       setUpdateFormFields({});
     } catch (error) {
-      console.error('Failed to update product:', error);
+      console.error("Failed to update product:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to update product',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to update product",
+        variant: "destructive",
       });
     }
   };
@@ -163,35 +175,50 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
               <TableCell>{product.product_code}</TableCell>
               <TableCell>{product.net_weight}</TableCell>
               <TableCell>{product.gross_weight}</TableCell>
-              <TableCell>{product.huid_no || 'N/A'}</TableCell>
+              <TableCell>{product.huid_no || "N/A"}</TableCell>
               <TableCell>{product.hsn_code}</TableCell>
               <TableCell>₹{product.sales_rate.toFixed(2)}</TableCell>
               <TableCell>{product.unit}</TableCell>
               <TableCell>
                 {product.barcode ? (
-                  <Barcode value={product.barcode} width={1} height={30} displayValue={false} />
+                  <Barcode
+                    value={product.barcode}
+                    width={1}
+                    height={30}
+                    displayValue={false}
+                  />
                 ) : (
-                  'N/A'
+                  "N/A"
                 )}
               </TableCell>
               <TableCell>₹{product.making_charges.toFixed(2)}</TableCell>
-              <TableCell>{product.hallmark_no || 'N/A'}</TableCell>
+              <TableCell>{product.hallmark_no || "N/A"}</TableCell>
               <TableCell>
-                {product.other_charges ? `₹${product.other_charges.toFixed(2)}` : 'N/A'}
+                {product.other_charges
+                  ? `₹${product.other_charges.toFixed(2)}`
+                  : "N/A"}
               </TableCell>
               <TableCell>
                 <div className="flex space-x-2">
-                  <Button variant="outline" size="icon" onClick={() => handleViewProduct(product)}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleViewProduct(product)}
+                  >
                     <Eye className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon" onClick={() => handleEditProduct(product)}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleEditProduct(product)}
+                  >
                     <Edit2 className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="destructive"
                     size="icon"
                     onClick={() => {
-                      setProductToDelete(product);
+                      setProductToDelete(product.id);
                       setIsDeleteModalOpen(true);
                     }}
                   >
@@ -206,7 +233,10 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
 
       {/* Product Details Modal */}
       {selectedProduct && (
-        <Dialog open={!!selectedProduct}  onOpenChange={() => setSelectedProduct(null)}>
+        <Dialog
+          open={!!selectedProduct}
+          onOpenChange={() => setSelectedProduct(null)}
+        >
           <DialogContent className="sm:max-w-4xl h-[90%] overflow-scroll">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold flex items-center">
@@ -220,20 +250,28 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
               <div className="bg-white shadow-md rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <Tag className="mr-3 text-blue-600 text-xl" />
-                  <h3 className="text-lg font-semibold">Product Identification</h3>
+                  <h3 className="text-lg font-semibold">
+                    Product Identification
+                  </h3>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Product Name</span>
-                    <span className="font-medium">{selectedProduct.product_name}</span>
+                    <span className="font-medium">
+                      {selectedProduct.product_name}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Product Code</span>
-                    <span className="font-medium">{selectedProduct.product_code}</span>
+                    <span className="font-medium">
+                      {selectedProduct.product_code}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">HSN Code</span>
-                    <span className="font-medium">{selectedProduct.hsn_code}</span>
+                    <span className="font-medium">
+                      {selectedProduct.hsn_code}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -247,11 +285,15 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Net Weight</span>
-                    <span className="font-medium">{selectedProduct.net_weight} gm</span>
+                    <span className="font-medium">
+                      {selectedProduct.net_weight} gm
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Gross Weight</span>
-                    <span className="font-medium">{selectedProduct.gross_weight} gm</span>
+                    <span className="font-medium">
+                      {selectedProduct.gross_weight} gm
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Unit</span>
@@ -269,18 +311,22 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Sales Rate</span>
-                    <span className="font-medium">₹{selectedProduct.sales_rate.toFixed(2)}</span>
+                    <span className="font-medium">
+                      ₹{selectedProduct.sales_rate.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Making Charges</span>
-                    <span className="font-medium">₹{selectedProduct.making_charges.toFixed(2)}</span>
+                    <span className="font-medium">
+                      ₹{selectedProduct.making_charges.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Other Charges</span>
                     <span className="font-medium">
                       {selectedProduct.other_charges
                         ? `₹${selectedProduct.other_charges.toFixed(2)}`
-                        : 'N/A'}
+                        : "N/A"}
                     </span>
                   </div>
                 </div>
@@ -290,16 +336,22 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
               <div className="bg-white shadow-md rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <BarcodeIcon className="mr-3 text-blue-600 text-xl" />
-                  <h3 className="text-lg font-semibold">Additional Information</h3>
+                  <h3 className="text-lg font-semibold">
+                    Additional Information
+                  </h3>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-500">HUID No.</span>
-                    <span className="font-medium">{selectedProduct.huid_no || 'N/A'}</span>
+                    <span className="font-medium">
+                      {selectedProduct.huid_no || "N/A"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Hallmark No.</span>
-                    <span className="font-medium">{selectedProduct.hallmark_no || 'N/A'}</span>
+                    <span className="font-medium">
+                      {selectedProduct.hallmark_no || "N/A"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Created At</span>
@@ -355,8 +407,10 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="product_name">Product Name</Label>
                 <Input
                   id="product_name"
-                  value={updateFormFields.product_name || ''}
-                  onChange={(e) => handleUpdateInputChange('product_name', e.target.value)}
+                  value={updateFormFields.product_name || ""}
+                  onChange={(e) =>
+                    handleUpdateInputChange("product_name", e.target.value)
+                  }
                   placeholder="Enter product name"
                   required
                 />
@@ -368,8 +422,10 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Input
                   id="gross_weight"
                   type="number"
-                  value={updateFormFields.gross_weight || ''}
-                  onChange={(e) => handleUpdateInputChange('gross_weight', e.target.value)}
+                  value={updateFormFields.gross_weight || ""}
+                  onChange={(e) =>
+                    handleUpdateInputChange("gross_weight", e.target.value)
+                  }
                   placeholder="Enter gross weight"
                   required
                 />
@@ -381,8 +437,10 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Input
                   id="net_weight"
                   type="number"
-                  value={updateFormFields.net_weight || ''}
-                  onChange={(e) => handleUpdateInputChange('net_weight', e.target.value)}
+                  value={updateFormFields.net_weight || ""}
+                  onChange={(e) =>
+                    handleUpdateInputChange("net_weight", e.target.value)
+                  }
                   placeholder="Enter net weight"
                   required
                 />
@@ -393,8 +451,10 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="hsn_code">HSN Code</Label>
                 <Input
                   id="hsn_code"
-                  value={updateFormFields.hsn_code || ''}
-                  onChange={(e) => handleUpdateInputChange('hsn_code', e.target.value)}
+                  value={updateFormFields.hsn_code || ""}
+                  onChange={(e) =>
+                    handleUpdateInputChange("hsn_code", e.target.value)
+                  }
                   placeholder="Enter HSN code"
                   required
                 />
@@ -406,8 +466,10 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Input
                   id="sales_rate"
                   type="number"
-                  value={updateFormFields.sales_rate || ''}
-                  onChange={(e) => handleUpdateInputChange('sales_rate', e.target.value)}
+                  value={updateFormFields.sales_rate || ""}
+                  onChange={(e) =>
+                    handleUpdateInputChange("sales_rate", e.target.value)
+                  }
                   placeholder="Enter sales rate"
                   required
                 />
@@ -418,8 +480,10 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="unit">Unit</Label>
                 <Input
                   id="unit"
-                  value={updateFormFields.unit || ''}
-                  onChange={(e) => handleUpdateInputChange('unit', e.target.value)}
+                  value={updateFormFields.unit || ""}
+                  onChange={(e) =>
+                    handleUpdateInputChange("unit", e.target.value)
+                  }
                   placeholder="Enter unit"
                   required
                 />
@@ -431,8 +495,10 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Input
                   id="making_charges"
                   type="number"
-                  value={updateFormFields.making_charges || ''}
-                  onChange={(e) => handleUpdateInputChange('making_charges', e.target.value)}
+                  value={updateFormFields.making_charges || ""}
+                  onChange={(e) =>
+                    handleUpdateInputChange("making_charges", e.target.value)
+                  }
                   placeholder="Enter making charges"
                   required
                 />
@@ -443,8 +509,10 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="huid_no">HUID No. (Optional)</Label>
                 <Input
                   id="huid_no"
-                  value={updateFormFields.huid_no || ''}
-                  onChange={(e) => handleUpdateInputChange('huid_no', e.target.value)}
+                  value={updateFormFields.huid_no || ""}
+                  onChange={(e) =>
+                    handleUpdateInputChange("huid_no", e.target.value)
+                  }
                   placeholder="Enter HUID number"
                 />
               </div>
@@ -453,8 +521,10 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Label htmlFor="hallmark_no">Hallmark No. (Optional)</Label>
                 <Input
                   id="hallmark_no"
-                  value={updateFormFields.hallmark_no || ''}
-                  onChange={(e) => handleUpdateInputChange('hallmark_no', e.target.value)}
+                  value={updateFormFields.hallmark_no || ""}
+                  onChange={(e) =>
+                    handleUpdateInputChange("hallmark_no", e.target.value)
+                  }
                   placeholder="Enter hallmark number"
                 />
               </div>
@@ -464,8 +534,10 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                 <Input
                   id="other_charges"
                   type="number"
-                  value={updateFormFields.other_charges || ''}
-                  onChange={(e) => handleUpdateInputChange('other_charges', e.target.value)}
+                  value={updateFormFields.other_charges || ""}
+                  onChange={(e) =>
+                    handleUpdateInputChange("other_charges", e.target.value)
+                  }
                   placeholder="Enter other charges"
                 />
               </div>
@@ -496,27 +568,36 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
           setProductToDelete(null);
         }}
       >
-         <DialogContent>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirm Deletion</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the product "{productToDelete?.product_name}"?
-              This action cannot be undone.
+              Are you sure you want to delete the product "
+              {productToDelete?.product_name}"? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteProduct}
-            >
-              Delete
-            </Button>
+            <Form method="post">
+              <Input
+                className="hidden"
+                name="form_type"
+                defaultValue="delete-form"
+              />
+              <Input
+                className="hidden"
+                name="productId"
+                defaultValue={Number(productToDelete)}
+              />
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteProduct}>
+                Delete
+              </Button>
+            </Form>
           </div>
         </DialogContent>
       </Dialog>
