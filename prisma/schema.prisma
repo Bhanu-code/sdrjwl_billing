@@ -92,3 +92,33 @@ model Purchase {
   created_at DateTime? @default(now())
   updated_at DateTime? @updatedAt
 }
+
+
+model SalesPOS {
+  id                  Int      @id @default(autoincrement())
+  contact_number      String
+  customer_id         String
+  customer_name       String
+  gstin_no            String
+  product_code        String
+  product_name        String
+  gold_price          Float
+  live_rate           Boolean
+  master_entry_rate   Float?
+  manual_rate         Float?
+  unit                String
+  net_weight          Float
+  making_charges      Float
+  sales_total         Float
+  discount_percent    Float
+  total_rate          Float
+  gst_type            String
+  total_amount        Float
+  barcode_number      String
+  other_charges       Float
+  reference           String
+  pay_mode            String
+  cash_adjustment     Float
+  created_at          DateTime @default(now())
+  updated_at          DateTime? @updatedAt
+}

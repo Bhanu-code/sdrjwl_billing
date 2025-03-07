@@ -1,0 +1,30 @@
+-- CreateTable
+CREATE TABLE `SalesPOS` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `contact_number` VARCHAR(191) NOT NULL,
+    `customer_id` VARCHAR(191) NOT NULL,
+    `customer_name` VARCHAR(191) NOT NULL,
+    `gstin_no` VARCHAR(191) NOT NULL,
+    `product_code` VARCHAR(191) NOT NULL,
+    `product_name` VARCHAR(191) NOT NULL,
+    `gold_price` DOUBLE NOT NULL,
+    `live_rate` BOOLEAN NOT NULL,
+    `master_entry_rate` DOUBLE NULL,
+    `manual_rate` DOUBLE NULL,
+    `unit` VARCHAR(191) NOT NULL,
+    `net_weight` DOUBLE NOT NULL,
+    `making_charges` DOUBLE NOT NULL,
+    `sales_total` DOUBLE NOT NULL,
+    `discount_percent` DOUBLE NOT NULL,
+    `total_rate` DOUBLE NOT NULL,
+    `gst_type` VARCHAR(191) NOT NULL,
+    `total_amount` DOUBLE NOT NULL,
+    `barcode_number` VARCHAR(191) NOT NULL,
+    `other_charges` DOUBLE NOT NULL,
+    `reference` VARCHAR(191) NOT NULL,
+    `pay_mode` VARCHAR(191) NOT NULL,
+    `cash_adjustment` DOUBLE NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

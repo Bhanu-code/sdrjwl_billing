@@ -5,10 +5,10 @@ import { z } from "zod";
 // Validation Schema
 export const MasterEntrySchema = z.object({
   id: z.number().optional(),
-  gold_16k: z.number().min(0).optional(),
-  gold_18k: z.number().min(0).optional(),
-  gold_22k: z.number().min(0).optional(),
-  gold_24k: z.number().min(0).optional(),
+  gold_16c: z.number().min(0).optional(), // Use gold_16c instead of gold_16k
+  gold_18c: z.number().min(0).optional(), // Use gold_18c instead of gold_18k
+  gold_22c: z.number().min(0).optional(), // Use gold_22c instead of gold_22k
+  gold_24c: z.number().min(0).optional(), // Use gold_24c instead of gold_24k
   silver_pure: z.number().min(0).optional(),
   silver_ornamental: z.number().min(0).optional(),
   remarks: z.string().optional().nullable(),
@@ -17,40 +17,40 @@ export const MasterEntrySchema = z.object({
 
 // Create Master Entry
 export async function createOrUpdateMasterEntry(data: z.infer<typeof MasterEntrySchema>) {
-    try {
-      const validatedData = MasterEntrySchema.parse(data);
-  
-      // Always upsert to ID 1
-      const updatedEntry = await prisma.masterEntry.upsert({
-        where: { id: 1 },
-        update: {
-          gold_16c: validatedData.gold_16k,
-          gold_18c: validatedData.gold_18k,
-          gold_22c: validatedData.gold_22k,
-          gold_24c: validatedData.gold_24k,
-          silver_pure: validatedData.silver_pure,
-          silver_ornamental: validatedData.silver_ornamental,
-          remarks: validatedData.remarks
-        },
-        create: {
-          id: 1,  // Force ID to be 1
-          gold_16c: validatedData.gold_16k,
-          gold_18c: validatedData.gold_18k,
-          gold_22c: validatedData.gold_22k,
-          gold_24c: validatedData.gold_24k,
-          silver_pure: validatedData.silver_pure,
-          silver_ornamental: validatedData.silver_ornamental,
-          remarks: validatedData.remarks
-        }
-      });
-  
-      console.log('Master Entry Updated:', updatedEntry);
-      return updatedEntry;
-    } catch (error) {
-      console.error('Create/Update Master Entry Error:', error);
-      throw error;
-    }
+  try {
+    const validatedData = MasterEntrySchema.parse(data);
+
+    // Always upsert to ID 1
+    const updatedEntry = await prisma.masterEntry.upsert({
+      where: { id: 1 },
+      update: {
+        gold_16c: validatedData.gold_16c, // Use gold_16c
+        gold_18c: validatedData.gold_18c, // Use gold_18c
+        gold_22c: validatedData.gold_22c, // Use gold_22c
+        gold_24c: validatedData.gold_24c, // Use gold_24c
+        silver_pure: validatedData.silver_pure,
+        silver_ornamental: validatedData.silver_ornamental,
+        remarks: validatedData.remarks
+      },
+      create: {
+        id: 1,  // Force ID to be 1
+        gold_16c: validatedData.gold_16c, // Use gold_16c
+        gold_18c: validatedData.gold_18c, // Use gold_18c
+        gold_22c: validatedData.gold_22c, // Use gold_22c
+        gold_24c: validatedData.gold_24c, // Use gold_24c
+        silver_pure: validatedData.silver_pure,
+        silver_ornamental: validatedData.silver_ornamental,
+        remarks: validatedData.remarks
+      }
+    });
+
+    console.log('Master Entry Updated:', updatedEntry);
+    return updatedEntry;
+  } catch (error) {
+    console.error('Create/Update Master Entry Error:', error);
+    throw error;
   }
+}
 
 // Update Master Entry
 export async function updateMasterEntry(id: number, data: z.infer<typeof MasterEntrySchema>) {
@@ -60,10 +60,10 @@ export async function updateMasterEntry(id: number, data: z.infer<typeof MasterE
     return await prisma.masterEntry.update({
       where: { id },
       data: {
-        gold_16c: validatedData.gold_16k,
-        gold_18c: validatedData.gold_18k,
-        gold_22c: validatedData.gold_22k,
-        gold_24c: validatedData.gold_24k,
+        gold_16c: validatedData.gold_16c,
+        gold_18c: validatedData.gold_18c,
+        gold_22c: validatedData.gold_22c,
+        gold_24c: validatedData.gold_24c,
         silver_pure: validatedData.silver_pure,
         silver_ornamental: validatedData.silver_ornamental,
         remarks: validatedData.remarks
