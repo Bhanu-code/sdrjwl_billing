@@ -53,6 +53,11 @@ interface SalesPOS {
   gst_type: 'gst' | 'igst';
   total_amount: number;
   created_at: string;
+  barcode_number?: string;
+  other_charges?: number;
+  reference?: string;
+  pay_mode?: string;
+  cash_adjustment?: number;
 }
 
 interface POSTableProps {
@@ -191,6 +196,7 @@ export function SalesPOSTable({ data }: POSTableProps) {
       }
     }
   }, [fetcher.state, fetcher.data, selectedSale]);
+
   const handleViewDetails = (sale: SalesPOS) => {
     setSelectedSale(sale);
     setIsDetailModalOpen(true);
@@ -216,7 +222,6 @@ export function SalesPOSTable({ data }: POSTableProps) {
     return <div>No sales data available.</div>;
   }
 
-
   return (
     <>
       <Table>
@@ -241,7 +246,7 @@ export function SalesPOSTable({ data }: POSTableProps) {
               <TableCell>₹{sale.total_amount.toFixed(2)}</TableCell>
               <TableCell>{new Date(sale.created_at).toLocaleString()}</TableCell>
               <TableCell>
-              <div className="flex space-x-2">
+                <div className="flex space-x-2">
                   <Button 
                     variant="outline" 
                     size="icon" 
@@ -288,7 +293,7 @@ export function SalesPOSTable({ data }: POSTableProps) {
           open={isDetailModalOpen} 
           onOpenChange={setIsDetailModalOpen}
         >
-          <DialogContent className="sm:max-w-4xl">
+          <DialogContent className="sm:max-w-4xl h-[97%]">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold flex items-center">
                 <FaReceipt className="mr-3 text-blue-600" />
@@ -299,9 +304,9 @@ export function SalesPOSTable({ data }: POSTableProps) {
               </DialogDescription>
             </DialogHeader>
             
-            <div className="border-b border-gray-200 my-4"></div>
+            <div className="border-b border-gray-200 "></div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="bg-white shadow-md rounded-lg p-6">
                 <div className="flex items-center mb-4">
                   <FaUser className="mr-3 text-blue-600 text-xl" />
@@ -341,6 +346,10 @@ export function SalesPOSTable({ data }: POSTableProps) {
                     <span className="text-gray-500">Net Weight</span>
                     <span className="font-medium">{selectedSale.net_weight.toFixed(2)} gm</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Barcode Number</span>
+                    <span className="font-medium">{selectedSale.barcode_number || 'N/A'}</span>
+                  </div>
                 </div>
               </div>
 
@@ -362,6 +371,22 @@ export function SalesPOSTable({ data }: POSTableProps) {
                     <span className="text-gray-500">Sales Total</span>
                     <span className="font-medium">₹{selectedSale.sales_total.toFixed(2)}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Discount Percent</span>
+                    <span className="font-medium">{selectedSale.discount_percent}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Total Rate</span>
+                    <span className="font-medium">₹{selectedSale.total_rate.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Other Charges</span>
+                    <span className="font-medium">₹{selectedSale.other_charges || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Cash Adjustment</span>
+                    <span className="font-medium">₹{selectedSale.cash_adjustment || 0}</span>
+                  </div>
                 </div>
               </div>
 
@@ -371,65 +396,66 @@ export function SalesPOSTable({ data }: POSTableProps) {
                   <h3 className="text-lg font-semibold">GST Breakdown</h3>
                 </div>
                 {(() => {
-                const gstDetails = calculateGSTDetails(selectedSale);
-                
-                return (
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">GST Type</span>
-                      <span className="font-medium">{gstDetails.gstType}</span>
-                    </div>
-                    
-                    {gstDetails.gstType === 'CGST & SGST' ? (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">CGST Rate</span>
-                          <span className="font-medium">{gstDetails.cgstRate ?? 0}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">CGST Amount</span>
-                          <span className="font-medium">₹{(gstDetails.cgstAmount ?? 0).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">SGST Rate</span>
-                          <span className="font-medium">{gstDetails.sgstRate ?? 0}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">SGST Amount</span>
-                          <span className="font-medium">₹{(gstDetails.sgstAmount ?? 0).toFixed(2)}</span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">IGST Rate</span>
-                          <span className="font-medium">{gstDetails.igstRate ?? 0}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">IGST Amount</span>
-                          <span className="font-medium">₹{(gstDetails.igstAmount ?? 0).toFixed(2)}</span>
-                        </div>
-                      </>
-                    )}
+                  const gstDetails = calculateGSTDetails(selectedSale);
+                  
+                  return (
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">GST Type</span>
+                        <span className="font-medium">{gstDetails.gstType}</span>
+                      </div>
+                      
+                      {gstDetails.gstType === 'CGST & SGST' ? (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">CGST Rate</span>
+                            <span className="font-medium">{gstDetails.cgstRate ?? 0}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">CGST Amount</span>
+                            <span className="font-medium">₹{(gstDetails.cgstAmount ?? 0).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">SGST Rate</span>
+                            <span className="font-medium">{gstDetails.sgstRate ?? 0}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">SGST Amount</span>
+                            <span className="font-medium">₹{(gstDetails.sgstAmount ?? 0).toFixed(2)}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">IGST Rate</span>
+                            <span className="font-medium">{gstDetails.igstRate ?? 0}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">IGST Amount</span>
+                            <span className="font-medium">₹{(gstDetails.igstAmount ?? 0).toFixed(2)}</span>
+                          </div>
+                        </>
+                      )}
                       
                       <div className="border-b border-gray-200 my-2"></div>
                     
-                    <div className="flex justify-between font-bold">
-                      <span>Total GST</span>
-                      <span>₹{gstDetails.totalGST.toFixed(2)}</span>
+                      <div className="flex justify-between font-bold">
+                        <span>Total GST</span>
+                        <span>₹{gstDetails.totalGST.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-blue-600">
+                        <span>Total Amount (Inc. GST)</span>
+                        <span>₹{gstDetails.totalAmount.toFixed(2)}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between font-bold text-blue-600">
-                      <span>Total Amount (Inc. GST)</span>
-                      <span>₹{gstDetails.totalAmount.toFixed(2)}</span>
-                    </div>
-                  </div>
-                );
-              })()}
+                  );
+                })()}
               </div>
             </div>
           </DialogContent>
         </Dialog>
       )}
+
        <Dialog 
         open={isUpdateModalOpen} 
         onOpenChange={setIsUpdateModalOpen}

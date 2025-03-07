@@ -33,56 +33,37 @@ interface ExtendedFile extends File {
   path?: string;
 }
 
-const AddCompanyModal: React.FC = () => {
-  // Initial state for form fields
-  // const initialState: CompanyFormFields = {
-  //   name: '',
-  //   address: '',
-  //   state: '',
-  //   contact_no: '',
-  //   gstin_no: null,
-  //   upi_id: null,
-  //   logo_path: null,
-  //   bis_reg_no: null,  // New field
-  //   pan: null,         // New field
-  // };
-  // State management
-  // const [formFields, setFormFields] = useState<CompanyFormFields>(initialState);
+const AddCompanyModal = (companyInfo: any) => {
+
+    // console.log("Comapny Info", companyInfo)
+  
   
   const [isOpen, setIsOpen] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
-  // Fetch the single company entry on component mount
-  
-
-  // Generic handler for input changes
-  // const handleInputChange = (
-  //   field: keyof CompanyFormFields, 
-  //   value: string
-  // ) => {
-  //   setFormFields(prev => ({
-  //     ...prev,
-  //     [field]: value
-  //   }));
-  // };
-
- 
-
-
-
-
-
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <span>Company Registration</span>
+        <span>Edit Company Info</span>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[1000px]">
         <DialogHeader>
           <DialogTitle className="text-blue-700">Add Company Information</DialogTitle>
         </DialogHeader>
-        <Form method='post' action='./about_company'>
+        <Form method='post'>
           <div className="grid grid-cols-2 gap-5 justify-between">
+            {/* Form Type */}
+          <div className="hidden  flex-col gap-2 items-start justify-between">
+              <Label htmlFor="form_type" className="text-right">
+                Form Type
+              </Label>
+              <Input
+                name="form_type"
+                className="col-span-3"
+                defaultValue="edit-form"
+                required
+              />
+            </div>
             {/* Company Name */}
             <div className="flex flex-col gap-2 items-start justify-between">
               <Label htmlFor="company_name" className="text-right">
@@ -91,6 +72,7 @@ const AddCompanyModal: React.FC = () => {
               <Input
                 name="company_name"
                 className="col-span-3"
+                defaultValue={companyInfo?.companyInfo?.company_name}
                 required
               />
             </div>
@@ -140,6 +122,7 @@ const AddCompanyModal: React.FC = () => {
               <Input
                 name="city"
                 className="col-span-3"
+                defaultValue={companyInfo?.companyInfo?.city}
                 required
               />
             </div>
@@ -151,6 +134,7 @@ const AddCompanyModal: React.FC = () => {
               <Input
                 name="district"
                 className="col-span-3"
+                defaultValue={companyInfo?.companyInfo?.district}
                 required
               />
             </div>
@@ -163,6 +147,7 @@ const AddCompanyModal: React.FC = () => {
               <Input
                 name="state"
                 className="col-span-3"
+                defaultValue={companyInfo?.companyInfo?.state}
                 required
               />
             </div>
@@ -175,6 +160,7 @@ const AddCompanyModal: React.FC = () => {
               <Input
                 name="contact_no"
                 className="col-span-3"
+                defaultValue={companyInfo?.companyInfo?.contact_no}
                 required
               />
             </div>
@@ -187,6 +173,7 @@ const AddCompanyModal: React.FC = () => {
               <Input
                 name="gstin_no"
                 className="col-span-3"
+                defaultValue={companyInfo?.companyInfo?.gstin_no}
               />
             </div>
 
@@ -198,6 +185,7 @@ const AddCompanyModal: React.FC = () => {
               <Input
                 name="upi_id"
                 className="col-span-3"
+                defaultValue={companyInfo?.companyInfo?.upi_id}
               />
             </div><div className="flex flex-col gap-2 items-start justify-between">
               <Label htmlFor="bis_reg_no" className="text-right">
@@ -206,6 +194,7 @@ const AddCompanyModal: React.FC = () => {
               <Input
                 name="bis_reg_no"
                 className="col-span-3"
+                defaultValue={companyInfo?.companyInfo?.bis_reg_no}
               />
             </div>
 
@@ -217,6 +206,7 @@ const AddCompanyModal: React.FC = () => {
               <Input
                 name="pan_no"
                 className="col-span-3"
+                defaultValue={companyInfo?.companyInfo?.pan_no}
               />
             </div>
           </div>
@@ -231,8 +221,10 @@ const AddCompanyModal: React.FC = () => {
             </Button>
             <Button 
               type="submit" 
+              onClick={()=>{
+                setIsOpen(false)
+              }}
               className="bg-blue-700 text-white hover:bg-blue-800"
-              onClick={() => setIsOpen(false)}
             >
               Save Company Information
             </Button>
@@ -242,5 +234,7 @@ const AddCompanyModal: React.FC = () => {
     </Dialog>
   );
 };
+
+
 
 export default AddCompanyModal;

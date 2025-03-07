@@ -12,7 +12,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
-import { createSalesPOS, getSalesPOSData, deleteSalesPOS } from "~/data/salesPOS.server";
+import { createSalesPOS, getSalesPOSData, deleteSalesPOS, getMasterEntryData } from "~/data/salesPOS.server";
 import SalesPOSTable from "~/components/SalesPOSTable"; // Import the SalesPOSTable component
 import { z } from "zod";
 
@@ -45,7 +45,8 @@ const SalesPOSFormSchema = z.object({
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const salesPOSData = await getSalesPOSData();
-  return json({ salesPOSData });
+  const masterEntryData = await getMasterEntryData();
+  return json({ salesPOSData, masterEntryData });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -64,9 +65,15 @@ export async function action({ request }: ActionFunctionArgs) {
         // Create the sales POS entry
         const createdPOS = await createSalesPOS(parsedData);
         return json({ createdPOS, success: true });
-      } catch (error) {
+      }catch (error) {
         console.error("Error creating sales POS:", error);
-        return json({ error: error.message || "Failed to create sales POS entry", success: false }, { status: 400 });
+        return json(
+          { 
+            error: error instanceof Error ? error.message : "Failed to create sales POS entry", 
+            success: false 
+          }, 
+          { status: 400 }
+        );
       }
     }
     case "delete": {
@@ -79,7 +86,7 @@ export async function action({ request }: ActionFunctionArgs) {
         return json({ success: true });
       } catch (error) {
         console.error("Error deleting sales POS:", error);
-        return json({ error: error.message || "Failed to delete sales POS entry", success: false }, { status: 400 });
+        return json({ error: error instanceof Error ? error.message : "Failed to delete sales POS entry", success: false }, { status: 400 });
       }
     }
     default:
@@ -87,9 +94,15 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 }
 
+type ActionResponse = {
+  success: boolean;
+  createdPOS?: any; // Replace `any` with the actual type of `createdPOS`
+  error?: string;
+};
+
 const SalesPOS = () => {
-  const { salesPOSData } = useLoaderData<typeof loader>();
-  const fetcher = useFetcher();
+  const { salesPOSData, masterEntryData } = useLoaderData<typeof loader>();
+  const fetcher = useFetcher<ActionResponse>();
   const [isOpen, setIsOpen] = useState(false);
 
   // State variables for form inputs
@@ -100,7 +113,7 @@ const SalesPOS = () => {
   const [productCode, setProductCode] = useState<string>("");
   const [productName, setProductName] = useState<string>("");
   const [gstType, setGstType] = useState<string>("gst"); // Default to "gst"
-  const [liveRate, setLiveRate] = useState<string>("gold_24k"); // Default to gold_24k
+  const [liveRate, setLiveRate] = useState<string>("gold_24c"); // Default to gold_24k
   const [manualRate, setManualRate] = useState<string>("");
   const [netWeight, setNetWeight] = useState<number>(0);
   const [makingCharges, setMakingCharges] = useState<number>(0);
@@ -120,11 +133,11 @@ const SalesPOS = () => {
   const [goldPrice, setGoldPrice] = useState<number>(6000); // Default gold price
 
   // Set default live rate prices - in a real app, these would come from an API or database
-  const liveRatePrices = {
-    gold_24k: 6000,
-    gold_22k: 5500,
-    gold_18k: 4500,
-    gold_16k: 4000,
+  const liveRatePrices = masterEntryData[0] || {
+    gold_16c: 4000,
+    gold_18c: 4500,
+    gold_22c: 5500,
+    gold_24c: 6000,
     silver_pure: 800,
     silver_ornamental: 900,
     manual: 0 // This will be overridden by manual input
@@ -141,7 +154,7 @@ const SalesPOS = () => {
       setSelectedLiveRatePrice(parsedRate);
       setGoldPrice(parsedRate);
     }
-  }, [liveRate, manualRate]);
+  }, [liveRate, manualRate, liveRatePrices]);
 
   // Calculate sales total
   const calculateSalesTotal = () => {
@@ -345,10 +358,9 @@ const SalesPOS = () => {
                       />
                     </div>
 
-
                     {/* Product Name */}
                     <div className="flex flex-col gap-1 items-start justify-between">
-                    <Label htmlFor="product_name" className="text-right text-sm">
+                      <Label htmlFor="product_name" className="text-right text-sm">
                         Product Name
                       </Label>
                       <Input
@@ -397,10 +409,10 @@ const SalesPOS = () => {
                         onChange={(e) => setLiveRate(e.target.value)}
                         className="w-full p-2 border rounded"
                       >
-                        <option value="gold_24k">Gold 24K (₹{liveRatePrices.gold_24k}/g)</option>
-                        <option value="gold_22k">Gold 22K (₹{liveRatePrices.gold_22k}/g)</option>
-                        <option value="gold_18k">Gold 18K (₹{liveRatePrices.gold_18k}/g)</option>
-                        <option value="gold_16k">Gold 16K (₹{liveRatePrices.gold_16k}/g)</option>
+                        <option value="gold_24c">Gold 24K (₹{liveRatePrices.gold_24c}/g)</option>
+                        <option value="gold_22c">Gold 22K (₹{liveRatePrices.gold_22c}/g)</option>
+                        <option value="gold_18c">Gold 18K (₹{liveRatePrices.gold_18c}/g)</option>
+                        <option value="gold_16c">Gold 16K (₹{liveRatePrices.gold_16c}/g)</option>
                         <option value="silver_pure">Silver Pure (₹{liveRatePrices.silver_pure}/g)</option>
                         <option value="silver_ornamental">Silver Ornamental (₹{liveRatePrices.silver_ornamental}/g)</option>
                         <option value="manual">Manual Entry</option>

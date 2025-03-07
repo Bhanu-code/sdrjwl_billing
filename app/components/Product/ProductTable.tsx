@@ -172,7 +172,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
           {products.map((product) => (
             <TableRow key={product.id}>
               <TableCell>{product.product_name}</TableCell>
-              <TableCell>{product.product_code}</TableCell>
+              <TableCell>{product.product_code ? product.product_code :"--|--"}</TableCell>
               <TableCell>{product.net_weight}</TableCell>
               <TableCell>{product.gross_weight}</TableCell>
               <TableCell>{product.huid_no || "N/A"}</TableCell>

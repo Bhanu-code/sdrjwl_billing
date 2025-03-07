@@ -52,6 +52,15 @@ export async function getSalesPOSData() {
   }
 }
 
+export async function getMasterEntryData() {
+  try {
+    return await prisma.masterEntry.findMany();
+  } catch (error) {
+    console.error('Get MasterEntry Data Error:', error);
+    throw error;
+  }
+}
+
 // Update Sales POS
 export async function updateSalesPOS(id: number, data: z.infer<typeof SalesPOSSchema>) {
   try {

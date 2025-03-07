@@ -26,6 +26,7 @@ const about_company = () => {
     <>
       <Button className="bg-blue-600 m-2">
         <EditCompanyModal companyInfo={companyData} />
+        {/* <AddCompanyModal companyInfo={companyData} /> */}
       </Button>
       <div className="grid grid-cols-1 p-10 md:grid-cols-2 gap-6">
         {/* Location Information */}
