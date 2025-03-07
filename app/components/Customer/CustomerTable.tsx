@@ -32,7 +32,7 @@ import { Form } from "@remix-run/react";
 // Comprehensive Customer interface
 interface Customer {
   id: number;
-  customer_name: string;
+  name: string;
   address: string;
   city: string;
   district: string;
@@ -62,7 +62,7 @@ export function CustomerTable(allCustomers: any) {
   // Strongly typed update form fields
   const [updateFormFields, setUpdateFormFields] =
     useState<CustomerUpdateFields>({
-      customer_name: "",
+      name: "",
       address: "",
       city: "",
       district: "",
@@ -82,7 +82,7 @@ export function CustomerTable(allCustomers: any) {
   // Open update customer modal
   const handleUpdateCustomer = (customer: Customer): void => {
     setUpdateFormFields({
-      customer_name: customer.customer_name,
+      name: customer.name,
       address: customer.address,
       city: customer.city,
       district: customer.district,
@@ -147,7 +147,7 @@ export function CustomerTable(allCustomers: any) {
               <TableCell>{customer.city}</TableCell>
               <TableCell>{customer.state}</TableCell>
               <TableCell>{customer.pincode}</TableCell>
-              <TableCell>{customer.gstin || "N/A"}</TableCell>{" "}
+              <TableCell>{customer.gstin_no || "N/A"}</TableCell>{" "}
               {/* Add this line */}
               <TableCell>
                 <div className="flex space-x-2">
@@ -208,19 +208,19 @@ export function CustomerTable(allCustomers: any) {
                   <div className="flex justify-between">
                     <span className="text-gray-500">Customer Name</span>
                     <span className="font-medium">
-                      {selectedCustomer.customer_name}
+                      {selectedCustomer.name}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">PAN</span>
                     <span className="font-medium">
-                      {selectedCustomer.pan || "N/A"}
+                      {selectedCustomer.pan_no || "N/A"}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">GSTIN</span>
                     <span className="font-medium">
-                      {selectedCustomer.gstin || "N/A"}
+                      {selectedCustomer.gstin_no || "N/A"}
                     </span>
                   </div>
                 </div>
@@ -322,7 +322,7 @@ export function CustomerTable(allCustomers: any) {
                     <Input
                       className="hidden"
                       name="customerId"
-                      defaultValue={selectedCustomer}
+                      defaultValue={selectedCustomer?.id}
                     />
                     <Input
                       id={key}
