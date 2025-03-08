@@ -1,5 +1,7 @@
 const path = require('path');
-const { withEsbuildOverride } = require("@netlify/remix-adapter");
+import { unstable_vitePlugin as remix } from "@remix-run/dev";
+import { vercelPreset } from "@vercel/remix/vite";
+import { defineConfig } from "vite";
 
 module.exports = {
   appDirectory: 'app',
@@ -32,15 +34,6 @@ module.exports = {
   },
 };
 
-withEsbuildOverride((option) => {
-  // Add your esbuild configuration here if needed
-  return option;
+export default defineConfig({
+  plugins: [remix({ presets: [vercelPreset()] })],
 });
-
-/** @type {import('@remix-run/dev').AppConfig} */
-module.exports = {
-  serverBuildTarget: "netlify",
-  server: "./server.ts",
-  ignoredRouteFiles: ["**/.*"],
-  // Add other configuration as needed
-};
