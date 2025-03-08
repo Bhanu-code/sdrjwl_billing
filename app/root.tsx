@@ -4,14 +4,29 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLocation,
+
+  useLoaderData,
+
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
+import { json, LoaderFunction } from "@remix-run/node";
 
 import "./tailwind.css";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import { ToastProvider } from "./components/ui/toast";
+import { getCompanyInfo } from "./data/company.server";
+
+// Define the type for our loader data
+type RootLoaderData = {
+  companyInfo: any;  // You could define a more specific type based on your company data structure
+};
+
+// Create a loader function to fetch company data
+export const loader: LoaderFunction = async () => {
+  const companyInfo = await getCompanyInfo();
+  return json({ companyInfo });
+};
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -45,14 +60,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const location = useLocation();
 
+  // Use the loader data in the root component
+  const { companyInfo } = useLoaderData<RootLoaderData>();
+  
   return (
     <>
       <div className="w-screen h-screen overflow-hidden">
-        {location.pathname !== "/" && location.pathname !== "/register" && (
-          <Navbar />
-        )}
+        <Navbar companyInfo={companyInfo} />
+
         <div className="flex">
           {location.pathname !== "/" && location.pathname !== "/register" && (
             <div className="w-[12rem]">
