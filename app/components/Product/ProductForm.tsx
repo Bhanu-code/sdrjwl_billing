@@ -33,11 +33,7 @@ export type ProductFormFields = {
   other_charges: string;
 };
 
-type ProductFormProps = {
-  onSubmit: (data: ProductFormFields) => Promise<void>;
-};
-
-export function ProductForm({ onSubmit }: ProductFormProps) {
+export function ProductForm() {
   const [isOpen, setIsOpen] = useState(false);
   const [formFields, setFormFields] = useState<ProductFormFields>({
     product_name: "",
@@ -57,28 +53,6 @@ export function ProductForm({ onSubmit }: ProductFormProps) {
       ...prev,
       [field]: value,
     }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await onSubmit(formFields);
-      setIsOpen(false); // Close dialog on successful submission
-      setFormFields({
-        product_name: "",
-        gross_weight: "",
-        net_weight: "",
-        huid_no: "",
-        hsn_code: "",
-        sales_rate: "",
-        unit: "",
-        making_charges: "",
-        hallmark_no: "",
-        other_charges: "",
-      });
-    } catch (error) {
-      console.error("Product submission error:", error);
-    }
   };
 
   const formConfig = [

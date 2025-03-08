@@ -15,7 +15,7 @@ import { Label } from "~/components/ui/label";
 const MasterEntryModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  
+
   // Provide a default empty object to prevent destructuring error
   const loaderData = useLoaderData() || { entry: null };
   const fetcher = useFetcher();
@@ -40,31 +40,31 @@ const MasterEntryModal: React.FC = () => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    
+
     // Determine intent based on whether entry exists
     formData.set('intent', currentEntry?.id ? 'update' : 'create');
     if (currentEntry?.id) formData.set('id', currentEntry.id.toString());
 
-    fetcher.submit(formData, { 
-      method: "POST", 
-      action: "/master-entry" 
+    fetcher.submit(formData, {
+      method: "POST",
+      action: "/master-entry"
     });
   };
 
   // Default values for new entry
   const defaultEntry = {
-    gold_16k: '0',
-    gold_18k: '0',
-    gold_22k: '0',
-    gold_24k: '0',
+    gold_16c: '0', // Use gold_16c
+    gold_18c: '0', // Use gold_18c
+    gold_22c: '0', // Use gold_22c
+    gold_24c: '0', // Use gold_24c
     silver_pure: '0',
     silver_ornamental: '0',
     remarks: ''
   };
 
   return (
-    <Dialog 
-      open={isOpen} 
+    <Dialog
+      open={isOpen}
       onOpenChange={(open) => {
         setIsOpen(open);
         // Ensure data is fresh when opening
@@ -84,11 +84,11 @@ const MasterEntryModal: React.FC = () => {
             {currentEntry?.id ? 'Update Master Entry' : 'Create Master Entry'}
           </DialogTitle>
         </DialogHeader>
-        
+
         <fetcher.Form method="POST" onSubmit={handleSubmit}>
           <div className="grid grid-cols-4 gap-5 justify-between">
             {[
-              'gold_16k', 'gold_18k', 'gold_22k', 'gold_24k', 
+              'gold_16c', 'gold_18c', 'gold_22c', 'gold_24c', // Use gold_16c, gold_18c, etc.
               'silver_pure', 'silver_ornamental'
             ].map((key) => (
               <div key={key} className="flex flex-col gap-2">
@@ -103,7 +103,7 @@ const MasterEntryModal: React.FC = () => {
                   type="number"
                   step="0.01"
                   defaultValue={
-                    currentEntry?.[key as keyof typeof defaultEntry] || 
+                    currentEntry?.[key as keyof typeof defaultEntry] ||
                     defaultEntry[key as keyof typeof defaultEntry]
                   }
                   required
@@ -133,13 +133,13 @@ const MasterEntryModal: React.FC = () => {
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="bg-blue-600 hover:bg-blue-700"
               disabled={fetcher.state === 'submitting'}
             >
-              {fetcher.state === 'submitting' 
-                ? 'Submitting...' 
+              {fetcher.state === 'submitting'
+                ? 'Submitting...'
                 : (currentEntry?.id ? 'Update' : 'Create')}
             </Button>
           </DialogFooter>

@@ -15,6 +15,7 @@ import { ActionFunctionArgs, LoaderFunctionArgs, json } from "@remix-run/node";
 import { createSalesPOS, getSalesPOSData, deleteSalesPOS, getMasterEntryData } from "~/data/salesPOS.server";
 import SalesPOSTable from "~/components/SalesPOSTable"; // Import the SalesPOSTable component
 import { z } from "zod";
+import { getCompanyInfo } from "~/data/company.server";
 
 // Define a schema for validating the form data
 const SalesPOSFormSchema = z.object({
@@ -46,7 +47,8 @@ const SalesPOSFormSchema = z.object({
 export async function loader({ request }: LoaderFunctionArgs) {
   const salesPOSData = await getSalesPOSData();
   const masterEntryData = await getMasterEntryData();
-  return json({ salesPOSData, masterEntryData });
+  const companyData = await getCompanyInfo();
+  return json({ salesPOSData, masterEntryData , companyData });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -101,7 +103,7 @@ type ActionResponse = {
 };
 
 const SalesPOS = () => {
-  const { salesPOSData, masterEntryData } = useLoaderData<typeof loader>();
+  const { salesPOSData, masterEntryData , companyData } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<ActionResponse>();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -736,7 +738,7 @@ const SalesPOS = () => {
         </Dialog>
       </div>
       <div className="data-table">
-        <SalesPOSTable data={salesPOSData} />
+        <SalesPOSTable data={salesPOSData} companyData ={companyData} />
       </div>
     </div>
   );

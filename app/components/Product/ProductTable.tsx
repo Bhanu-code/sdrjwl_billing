@@ -43,19 +43,19 @@ type Product = {
   sales_rate: number;
   unit: string;
   making_charges: number;
-  barcode: string | null;
+  barcode_number: string | null;
   hallmark_no: string | null;
   other_charges: number | null;
-  product_code: string;
+  product_id: number;
   created_at: string;
 };
 
 interface TableDemoProps {
   products: Product[];
-  fetchProducts: () => void;
+  // fetchProducts: () => void;
 }
 
-export function ProductTable({ products, fetchProducts }: TableDemoProps) {
+export function ProductTable({ products}: TableDemoProps) {
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -77,7 +77,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
         description: "Product deleted successfully",
         variant: "success",
       });
-      fetchProducts(); // Refresh the product list
+      // fetchProducts(); // Refresh the product list
       setIsDeleteModalOpen(false);
       setProductToDelete(null);
     } catch (error) {
@@ -107,7 +107,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
       sales_rate: product.sales_rate,
       unit: product.unit,
       making_charges: product.making_charges,
-      barcode: product.barcode,
+      barcode_number: product.barcode_number,
       hallmark_no: product.hallmark_no,
       other_charges: product.other_charges,
     });
@@ -134,7 +134,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
         description: "Product updated successfully",
         variant: "success",
       });
-      fetchProducts(); // Refresh the product list
+      // fetchProducts(); // Refresh the product list
       setIsUpdateModalOpen(false);
       setUpdateFormFields({});
     } catch (error) {
@@ -172,7 +172,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
           {products.map((product) => (
             <TableRow key={product.id}>
               <TableCell>{product.product_name}</TableCell>
-              <TableCell>{product.product_code ? product.product_code :"--|--"}</TableCell>
+              <TableCell>{product.product_id ? product.product_id :"--|--"}</TableCell>
               <TableCell>{product.net_weight}</TableCell>
               <TableCell>{product.gross_weight}</TableCell>
               <TableCell>{product.huid_no || "N/A"}</TableCell>
@@ -180,9 +180,9 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
               <TableCell>₹{product.sales_rate.toFixed(2)}</TableCell>
               <TableCell>{product.unit}</TableCell>
               <TableCell>
-                {product.barcode ? (
+                {product.barcode_number ? (
                   <Barcode
-                    value={product.barcode}
+                    value={product.barcode_number}
                     width={1}
                     height={30}
                     displayValue={false}
@@ -363,7 +363,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
               </div>
 
               {/* Barcode Section */}
-              {selectedProduct.barcode && (
+              {selectedProduct?.barcode_number && (
                 <div className="md:col-span-2 bg-white shadow-md rounded-lg p-6">
                   <div className="flex items-center mb-4">
                     <BarcodeIcon className="mr-3 text-blue-600 text-xl" />
@@ -371,7 +371,7 @@ export function ProductTable({ products, fetchProducts }: TableDemoProps) {
                   </div>
                   <div className="flex flex-col items-center justify-center">
                     <Barcode
-                      value={selectedProduct.barcode}
+                      value={selectedProduct.barcode_number}
                       width={2}
                       height={100}
                       displayValue={true}

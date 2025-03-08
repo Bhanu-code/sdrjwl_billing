@@ -33,13 +33,36 @@ interface CompanyModalProps {
   buttonText: string;
 }
 
-const EditCompanyModal = ({ companyInfo, mode, buttonText }: CompanyModalProps) => {
+const CompanyModal = ({ companyInfo, mode, buttonText }: CompanyModalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   
   const isEdit = mode === 'edit';
   const formTitle = isEdit ? "Edit Company Information" : "Add Company Information";
   const submitButtonText = isEdit ? "Save Company Information" : "Create Company";
+
+  // Function to handle logo upload and preview
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Function to remove logo preview
+  const handleRemoveLogo = () => {
+    setLogoPreview(null);
+    // You might want to reset the file input here
+    const fileInput = document.querySelector('input[name="company_logo"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -50,7 +73,7 @@ const EditCompanyModal = ({ companyInfo, mode, buttonText }: CompanyModalProps) 
         <DialogHeader>
           <DialogTitle className="text-blue-700">{formTitle}</DialogTitle>
         </DialogHeader>
-        <Form method="post">
+        <Form method="post" encType="multipart/form-data">
           <div className="grid grid-cols-2 gap-5 justify-between">
             {/* Hidden Form Type Field */}
             <input 
@@ -90,11 +113,13 @@ const EditCompanyModal = ({ companyInfo, mode, buttonText }: CompanyModalProps) 
                   name="company_logo"
                   accept="image/*"
                   className="flex-grow"
+                  onChange={handleFileUpload}
                 />
                 {logoPreview && (
                   <Button 
                     type="button" 
                     variant="destructive" 
+                    onClick={handleRemoveLogo}
                     className="ml-2"
                   >
                     Remove
@@ -235,4 +260,4 @@ const EditCompanyModal = ({ companyInfo, mode, buttonText }: CompanyModalProps) 
   );
 };
 
-export default EditCompanyModal;
+export default CompanyModal;
