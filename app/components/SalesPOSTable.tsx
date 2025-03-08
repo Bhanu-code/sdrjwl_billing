@@ -62,9 +62,10 @@ interface SalesPOS {
 
 interface POSTableProps {
   data: SalesPOS[];
+  companyData: CompanyInvoiceDetails; 
 }
 
-export function SalesPOSTable({ data }: POSTableProps) {
+export function SalesPOSTable({ data , companyData  }: POSTableProps) {
   const [salesPos, setSalesPOS] = useState<SalesPOS[]>(data || []);
   const [selectedSale, setSelectedSale] = useState<SalesPOS | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -577,6 +578,7 @@ export function SalesPOSTable({ data }: POSTableProps) {
           isOpen={isPrintModalOpen}
           onOpenChange={setIsPrintModalOpen}
           saleData={selectedSale}
+          companyData={companyData}
         />
       )} 
 

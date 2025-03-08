@@ -1,16 +1,27 @@
 import { prisma } from "~/data/database.server";
+import { generateUniqueProductId, generateUniqueBarcodeNumber } from "~/utils/generateUniqueId";
 
 export async function createProduct(userData: any) {
-  const existingUser = await prisma.product.findFirst({
+  // Check if the product already exists
+  const existingProduct = await prisma.product.findFirst({
     where: { product_name: userData.product_name },
   });
 
-  if (existingUser) {
+  if (existingProduct) {
     return { status: 401, msg: "Product Already Present" };
   }
 
+  // Generate a unique 6-digit product ID
+  const productId = await generateUniqueProductId();
+
+  // Generate a unique 13-digit barcode number
+  const barcodeNumber = await generateUniqueBarcodeNumber();
+
+  // Create the product with the generated product ID and barcode number
   const isSaved = await prisma.product.create({
     data: {
+      product_id: productId, // Add the generated product ID
+      barcode_number: barcodeNumber, // Add the generated barcode number
       product_name: userData.product_name,
       gross_weight: Number(userData.gross_weight),
       net_weight: Number(userData.net_weight),

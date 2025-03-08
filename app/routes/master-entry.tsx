@@ -10,112 +10,105 @@ import {
 } from "~/data/masterEntry.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-    try {
-      // Always attempt to get entry by ID 1
-      const latestEntry = await getMasterEntryById(1);
-      
-      console.log('Loader Fetched Entry:', latestEntry);
-  
-      // If no entry exists, create a default entry
-      if (!latestEntry) {
-        const defaultEntry = await createOrUpdateMasterEntry({
-          id: 1,
-          gold_16k: 0,
-          gold_18k: 0,
-          gold_22k: 0,
-          gold_24k: 0,
-          silver_pure: 0,
-          silver_ornamental: 0,
-          remarks: null
-        });
-  
-        return json({ 
-          entry: {
-            id: 1,
-            gold_16k: '0',
-            gold_18k: '0',
-            gold_22k: '0',
-            gold_24k: '0',
-            silver_pure: '0',
-            silver_ornamental: '0',
-            remarks: null
-          }
-        });
-      }
-  
-      // Transform the entry for frontend
-      return json({ 
-        entry: {
-          id: 1,
-          gold_16k: latestEntry.gold_16c?.toString() || '0',
-          gold_18k: latestEntry.gold_18c?.toString() || '0',
-          gold_22k: latestEntry.gold_22c?.toString() || '0',
-          gold_24k: latestEntry.gold_24c?.toString() || '0',
-          silver_pure: latestEntry.silver_pure?.toString() || '0',
-          silver_ornamental: latestEntry.silver_ornamental?.toString() || '0',
-          remarks: latestEntry.remarks || null
-        }
+  try {
+    const latestEntry = await getMasterEntryById(1);
+
+    if (!latestEntry) {
+      const defaultEntry = await createOrUpdateMasterEntry({
+        id: 1,
+        gold_16c: 0, // Use gold_16c
+        gold_18c: 0, // Use gold_18c
+        gold_22c: 0, // Use gold_22c
+        gold_24c: 0, // Use gold_24c
+        silver_pure: 0,
+        silver_ornamental: 0,
+        remarks: null
       });
-    } catch (error) {
-      console.error('Loader Error:', error);
-      
+
       return json({ 
         entry: {
           id: 1,
-          gold_16k: '0',
-          gold_18k: '0',
-          gold_22k: '0',
-          gold_24k: '0',
+          gold_16c: '0', // Use gold_16c
+          gold_18c: '0', // Use gold_18c
+          gold_22c: '0', // Use gold_22c
+          gold_24c: '0', // Use gold_24c
           silver_pure: '0',
           silver_ornamental: '0',
           remarks: null
         }
       });
     }
-  }
 
-  export async function action({ request }: ActionFunctionArgs) {
-    const formData = await request.formData();
-    const intent = formData.get('intent');
-  
-    try {
-      switch (intent) {
-        case 'create':
-        case 'update': {
-          const updatedEntry = await createOrUpdateMasterEntry({
-            id: 1,  // Always use ID 1
-            gold_16k: Number(formData.get('gold_16k')),
-            gold_18k: Number(formData.get('gold_18k')),
-            gold_22k: Number(formData.get('gold_22k')),
-            gold_24k: Number(formData.get('gold_24k')),
-            silver_pure: Number(formData.get('silver_pure')),
-            silver_ornamental: Number(formData.get('silver_ornamental')),
-            remarks: formData.get('remarks')?.toString() || null
-          });
-  
-          return json({ 
-            success: true, 
-            entry: {
-              id: 1,
-              gold_16k: updatedEntry.gold_16c?.toString() || '0',
-              gold_18k: updatedEntry.gold_18c?.toString() || '0',
-              gold_22k: updatedEntry.gold_22c?.toString() || '0',
-              gold_24k: updatedEntry.gold_24c?.toString() || '0',
-              silver_pure: updatedEntry.silver_pure?.toString() || '0',
-              silver_ornamental: updatedEntry.silver_ornamental?.toString() || '0',
-              remarks: updatedEntry.remarks || null
-            }
-          });
-        }
-        
-        default:
-          return json({ error: 'Invalid intent' }, { status: 400 });
+    return json({ 
+      entry: {
+        id: 1,
+        gold_16c: latestEntry.gold_16c?.toString() || '0', // Use gold_16c
+        gold_18c: latestEntry.gold_18c?.toString() || '0', // Use gold_18c
+        gold_22c: latestEntry.gold_22c?.toString() || '0', // Use gold_22c
+        gold_24c: latestEntry.gold_24c?.toString() || '0', // Use gold_24c
+        silver_pure: latestEntry.silver_pure?.toString() || '0',
+        silver_ornamental: latestEntry.silver_ornamental?.toString() || '0',
+        remarks: latestEntry.remarks || null
       }
-    } catch (error) {
-      console.error('Master Entry Action Error:', error);
-      return json({ error: 'Failed to process master entry' }, { status: 500 });
-    }
+    });
+  } catch (error) {
+    console.error('Loader Error:', error);
+    return json({ 
+      entry: {
+        id: 1,
+        gold_16c: '0', // Use gold_16c
+        gold_18c: '0', // Use gold_18c
+        gold_22c: '0', // Use gold_22c
+        gold_24c: '0', // Use gold_24c
+        silver_pure: '0',
+        silver_ornamental: '0',
+        remarks: null
+      }
+    });
   }
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const intent = formData.get('intent');
+
+  try {
+    switch (intent) {
+      case 'create':
+      case 'update': {
+        const updatedEntry = await createOrUpdateMasterEntry({
+          id: 1,
+          gold_16c: Number(formData.get('gold_16c')), // Use gold_16c
+          gold_18c: Number(formData.get('gold_18c')), // Use gold_18c
+          gold_22c: Number(formData.get('gold_22c')), // Use gold_22c
+          gold_24c: Number(formData.get('gold_24c')), // Use gold_24c
+          silver_pure: Number(formData.get('silver_pure')),
+          silver_ornamental: Number(formData.get('silver_ornamental')),
+          remarks: formData.get('remarks')?.toString() || null
+        });
+
+        return json({ 
+          success: true, 
+          entry: {
+            id: 1,
+            gold_16c: updatedEntry.gold_16c?.toString() || '0', // Use gold_16c
+            gold_18c: updatedEntry.gold_18c?.toString() || '0', // Use gold_18c
+            gold_22c: updatedEntry.gold_22c?.toString() || '0', // Use gold_22c
+            gold_24c: updatedEntry.gold_24c?.toString() || '0', // Use gold_24c
+            silver_pure: updatedEntry.silver_pure?.toString() || '0',
+            silver_ornamental: updatedEntry.silver_ornamental?.toString() || '0',
+            remarks: updatedEntry.remarks || null
+          }
+        });
+      }
+      default:
+        return json({ error: 'Invalid intent' }, { status: 400 });
+    }
+  } catch (error) {
+    console.error('Master Entry Action Error:', error);
+    return json({ error: 'Failed to process master entry' }, { status: 500 });
+  }
+}
 
 export default function MasterEntryPage() {
   const { entry } = useLoaderData<typeof loader>();
@@ -129,7 +122,7 @@ export default function MasterEntryPage() {
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            'gold_16k', 'gold_18k', 'gold_22k', 'gold_24k', 
+            'gold_16c', 'gold_18c', 'gold_22c', 'gold_24c', 
             'silver_pure', 'silver_ornamental'
           ].map((key) => (
             <div key={key}>

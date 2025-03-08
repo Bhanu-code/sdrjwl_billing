@@ -19,6 +19,8 @@ interface SalesPOS {
   net_weight: number;
   sales_total: number;
   total_rate: number;
+  reference: string;
+  cash_adjustment:number;
   gst_type: 'gst' | 'igst';
   created_at: string | Date;
 }
@@ -48,12 +50,14 @@ interface InvoiceModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   saleData: SalesPOS; 
+  companyData: CompanyInvoiceDetails;
 }
 
 const InvoiceModal: React.FC<InvoiceModalProps> = ({ 
   isOpen, 
   onOpenChange, 
-  saleData 
+  saleData ,
+  companyData // Add this line
 }) => {
   // Company static details
   const [companyDetails, setCompanyDetails] = useState<CompanyInvoiceDetails>({
@@ -63,6 +67,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     bis_reg_no: "BIS Reg Number"
   });
 
+  console.log("SALE Data : ",saleData)
+  console.log("Company Data : ",companyData)
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       // Fetch company details logic here
@@ -161,14 +167,14 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
           {/* Header */}
           <div className="header flex justify-between p-2 text-blue-500 border-[1px] border-slate-900">
             <div className="left calistoga-regular">
-              <h1>{companyDetails.company_name}</h1>
+              <h1>{companyData?.company_name ? companyData?.company_name :"Company Name" }</h1>
               <h2 className="ml-12">- GOLD & SILVER</h2>
-              <p>{companyDetails.address}</p>
+              <p>{companyData?.address}</p>
               <p>BIS CERTIFIED HALLMARK JEWELLERY SHOWROOM</p>
             </div>
             <div className="right">
-              <p>GSTIN: {companyDetails.gstin_no}</p>
-              <p>BIS REG. No.: {companyDetails.bis_reg_no}</p>
+              <p>GSTIN: {companyData?.gstin_no ? companyData?.gstin_no : "GSTIN NO"}</p>
+              <p>BIS REG. No.: {companyData?.bis_reg_no ? companyData?.bis_reg_no : "BIS REG NO"}</p>
             </div>
           </div>
           {/* Customer Info */}
@@ -180,7 +186,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
             <span><strong>Contact No</strong>: {saleData.contact_number || 'N/A'}</span>
             <span><strong>Payment Mode</strong>: Cash</span>
             <span><strong>GSTIN</strong>: {saleData.gstin_no || 'N/A'}</span>
-            <span><strong>Reference</strong>: -</span>
+            <span><strong>Reference</strong>: {saleData.reference || 'N/A'}</span>
           </div>
 
           {/* Gold Rate Section */}
@@ -251,7 +257,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                 <span>₹{gstDetails.totalAmount.toFixed(2)}</span>
               </div>
               
-              <div className="flex justify-between">
+              {/* <div className="flex justify-between">
                 <span><strong>Round Off</strong></span>
                 <span>₹0.00</span>
               </div>
@@ -259,7 +265,13 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               <div className="flex justify-between">
                 <span><strong>Hallmark/HUID Charge</strong></span>
                 <span>₹50.00</span>
+              </div> */}
+
+              <div className="flex justify-between">
+                <span><strong>Cash Ajustment</strong></span>
+                <span>₹{saleData?.cash_adjustment?.toFixed(2)}</span>
               </div>
+
               
               <div className="flex justify-between">
                 <span><strong>Total Payable Amount</strong></span>

@@ -62,6 +62,8 @@ model Customer {
 
 model Product {
   id             Int       @id @default(autoincrement())
+  product_id     String    @unique 
+  barcode_number String    @unique 
   product_name   String
   gross_weight   Int?
   net_weight     Int?
