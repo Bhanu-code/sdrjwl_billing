@@ -37,6 +37,8 @@ import { Label } from "~/components/ui/label";
 // };
 
 import '../index.css'
+import { ActionFunctionArgs } from "@remix-run/node";
+import { loginUser } from "~/data/login.server";
 
 export const meta: MetaFunction = () => {
   return [
@@ -67,13 +69,14 @@ export default function Index() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Form className="space-y-4" >
+            <Form method="post" className="space-y-4" >
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="email"
+                    name="email"
                     placeholder="Enter Your Email"
                     type="email"
                     className="pl-10"
@@ -88,6 +91,7 @@ export default function Index() {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="password"
+                    name="password"
                     placeholder="Enter Password"
                     type={showPassword ? "text" : "password"}
                     className="pl-10 pr-10"
@@ -210,3 +214,10 @@ const resources = [
     ),
   },
 ];
+
+export async function action({request}:ActionFunctionArgs) {
+  const formData = await request.formData()
+  const userData = Object.fromEntries(formData)
+
+  return await loginUser(userData) 
+}

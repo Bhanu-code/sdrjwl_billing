@@ -57,7 +57,7 @@ function constructVerificationLink(token: string): string {
 
 
 // Main registration function with proper error handling and types
-export async function registerUser(userData: any): Promise<RegistrationResponse> {
+export async function registerUser({ fullName, email, businessType, password }:any): Promise<RegistrationResponse> {
     try {
         // Validate environment variables first
         validateEnvironmentVariables();
@@ -65,11 +65,11 @@ export async function registerUser(userData: any): Promise<RegistrationResponse>
         // Log the current environment
         console.log('Current environment:', {
             NODE_ENV: process.env.NODE_ENV,
-            APP_URL: process.env.APP_URL,
+            // APP_URL: process.env.APP_URL,
         });
 
         const existingUser = await prisma.user.findFirst({ 
-            where: { email: userData.email } 
+            where: { email: email } 
         });
         
         if (existingUser) {
@@ -77,26 +77,22 @@ export async function registerUser(userData: any): Promise<RegistrationResponse>
         }
 
         // Create user and send verification in a transaction
-        const { user, verificationLink } = await prisma.$transaction(async (prisma:any) => {
-            const hashedPassword = await hashPassword(userData.password);
+        await prisma.$transaction(async (prisma:any) => {
+            const hashedPassword = await hashPassword(password);
             
             const newUser = await prisma.user.create({
                 data: {
-                    firstname: userData.firstname,
-                    midname: userData.midname,
-                    lastname: userData.lastname,
-                    gender: userData.gender,
-                    email: userData.email,
+                    full_name: fullName,
+                    email: email,
+                    bussinessType: businessType,
+                    isActive: false,
                     password: hashedPassword,
                 }
             });
 
-            const verificationToken = generateVerificationToken();
-            await saveVerificationToken(userData.email, verificationToken);
+           
             
-            const verificationLink = constructVerificationLink(verificationToken);
-            
-            return { user: newUser, verificationLink };
+            return newUser;
         });
 
 
