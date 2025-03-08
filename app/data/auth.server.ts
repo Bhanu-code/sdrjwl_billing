@@ -31,7 +31,7 @@ import {
   export async function createUserSession(userId: string) {
     const session = await sessionStorage.getSession();
     session.set("userId", userId);
-    return redirect("/dashboard", {
+    return redirect("/master-entry", {
       headers: {
         "Set-Cookie": await sessionStorage.commitSession(session),
       },
@@ -64,7 +64,7 @@ import {
       request.headers.get("Cookie")
     );
   
-    return redirect("/login", {
+    return redirect("/", {
       headers: {
         "Set-Cookie": await sessionStorage.destroySession(session),
       },

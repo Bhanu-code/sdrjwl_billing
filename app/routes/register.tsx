@@ -25,6 +25,7 @@ import {
 } from "~/components/ui/select";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Eye, EyeOff } from "lucide-react";
+import { registerUser } from "~/data/register.server";
 
 // Form validation schema
 const registerSchema = z.object({
@@ -76,7 +77,7 @@ export const action: ActionFunction = async ({ request }) => {
       password,
       confirmPassword,
     });
-  } catch (error) {
+  } catch (error:any) {
     const formattedErrors = error?.format();
     return json<ActionData>({
       fieldErrors: {
@@ -96,9 +97,9 @@ export const action: ActionFunction = async ({ request }) => {
 
   // TODO: Replace with actual user registration logic
   try {
-    // await registerUser({ fullName, email, businessType, password });
+    await registerUser({ fullName, email, businessType, password });
     console.log("User registered successfully");
-    return redirect("/login");
+    return redirect("/");
   } catch (error) {
     return json<ActionData>({
       formError: "Failed to create account. Please try again.",
@@ -280,3 +281,4 @@ export default function Register() {
     </div>
   );
 }
+
