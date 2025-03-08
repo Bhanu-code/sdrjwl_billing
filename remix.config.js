@@ -40,7 +40,7 @@ withEsbuildOverride((option) => {
 /** @type {import('@remix-run/dev').AppConfig} */
 module.exports = {
   serverBuildTarget: "netlify",
-  server: "./server.js",
+  server: "./server.ts",
   ignoredRouteFiles: ["**/.*"],
   // Add other configuration as needed
 };
