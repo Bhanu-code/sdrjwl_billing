@@ -1,4 +1,5 @@
 const path = require('path');
+const { withEsbuildOverride } = require("@netlify/remix-adapter");
 
 module.exports = {
   appDirectory: 'app',
@@ -29,4 +30,17 @@ module.exports = {
       '~': path.resolve(__dirname, 'app'),
     },
   },
+};
+
+withEsbuildOverride((option) => {
+  // Add your esbuild configuration here if needed
+  return option;
+});
+
+/** @type {import('@remix-run/dev').AppConfig} */
+module.exports = {
+  serverBuildTarget: "netlify",
+  server: "./server.js",
+  ignoredRouteFiles: ["**/.*"],
+  // Add other configuration as needed
 };
