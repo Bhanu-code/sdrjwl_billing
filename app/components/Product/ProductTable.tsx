@@ -55,7 +55,7 @@ interface TableDemoProps {
   // fetchProducts: () => void;
 }
 
-export function ProductTable({ products}: TableDemoProps) {
+export function ProductTable({ products }: TableDemoProps) {
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -64,6 +64,8 @@ export function ProductTable({ products}: TableDemoProps) {
     {}
   );
   const { toast } = useToast();
+
+  console.log("Products : ",products)
 
   // Handler for deleting a product
   const handleDeleteProduct = async () => {
@@ -172,7 +174,7 @@ export function ProductTable({ products}: TableDemoProps) {
           {products.map((product) => (
             <TableRow key={product.id}>
               <TableCell>{product.product_name}</TableCell>
-              <TableCell>{product.product_id ? product.product_id :"--|--"}</TableCell>
+              <TableCell>{product.product_id ? product.product_id : "--|--"}</TableCell>
               <TableCell>{product.net_weight}</TableCell>
               <TableCell>{product.gross_weight}</TableCell>
               <TableCell>{product.huid_no || "N/A"}</TableCell>
@@ -182,6 +184,7 @@ export function ProductTable({ products}: TableDemoProps) {
               <TableCell>
                 {product.barcode_number ? (
                   <Barcode
+                    key={product.barcode_number} // Unique key for each barcode
                     value={product.barcode_number}
                     width={1}
                     height={30}
