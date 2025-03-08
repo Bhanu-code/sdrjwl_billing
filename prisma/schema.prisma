@@ -8,11 +8,15 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  createdAt DateTime @default(now())
+  id            Int       @id @default(autoincrement())
+  full_name     String
+  bussinessType String
+  email         String    @unique
+  name          String?
+  password      String
+  isActive      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updated_at    DateTime? @updatedAt
 }
 
 model Company {
@@ -80,7 +84,7 @@ model Product {
 
 model Purchase {
   id               Int     @id @default(autoincrement())
-  customer_name    String 
+  customer_name    String
   customer_contact String?
   customer_address String?
   purity           Int

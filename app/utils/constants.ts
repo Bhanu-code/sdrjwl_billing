@@ -82,8 +82,8 @@ export const tabs = [
         path: "/customer"
     },
     {
-        name:"Sales Return",
-        path: "/home/sales-return"
+        name:"Master Entry",
+        path: "/master-entry"
     },
     {
         name: "About Company",

@@ -4,7 +4,9 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+
   useLoaderData,
+
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import { json, LoaderFunction } from "@remix-run/node";
@@ -58,6 +60,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+
   // Use the loader data in the root component
   const { companyInfo } = useLoaderData<RootLoaderData>();
   
@@ -65,10 +68,13 @@ export default function App() {
     <>
       <div className="w-screen h-screen overflow-hidden">
         <Navbar companyInfo={companyInfo} />
+
         <div className="flex">
-          <div className="w-[12rem]">
-            <Sidebar />
-          </div>
+          {location.pathname !== "/" && location.pathname !== "/register" && (
+            <div className="w-[12rem]">
+              <Sidebar />
+            </div>
+          )}
           <div className="flex-1 h-screen">
             <ToastProvider>
               <Outlet />
