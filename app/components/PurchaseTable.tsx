@@ -298,8 +298,9 @@ export function PurchaseTable({ refreshTable }: any) {
             setIsDetailsModalOpen(false);
             setSelectedPurchase(null);
           }}
+          
         >
-          <DialogContent className="sm:max-w-4xl">
+          <DialogContent className="sm:max-w-4xl h-screen overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold flex items-center">
                 <FaCoins className="mr-3 text-blue-600" />

@@ -6,6 +6,7 @@ import {
   ScrollRestoration,
 
   useLoaderData,
+  useLocation,
 
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
@@ -63,6 +64,7 @@ export default function App() {
 
   // Use the loader data in the root component
   const { companyInfo } = useLoaderData<RootLoaderData>();
+  const location = useLocation()
   
   return (
     <>

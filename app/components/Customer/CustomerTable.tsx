@@ -39,9 +39,9 @@ interface Customer {
   state: string;
   contact_no: string;
   pincode: string;
-  pan?: string | null;
+  pan_no?: string | null;
   upi_id?: string | null;
-  gstin?: string | null; // Add this line
+  gstin_no?: string | null; // Add this line
 }
 
 // Type for update form fields, excluding ID
@@ -69,8 +69,9 @@ export function CustomerTable(allCustomers: any) {
       state: "",
       contact_no: "",
       pincode: "",
-      pan: null,
+      pan_no: null,
       upi_id: null,
+      gstin_no: null,
     });
 
   // Open customer details modal
@@ -89,9 +90,9 @@ export function CustomerTable(allCustomers: any) {
       state: customer.state,
       contact_no: customer.contact_no,
       pincode: customer.pincode,
-      pan: customer.pan || null,
+      pan_no: customer.pan_no || null,
       upi_id: customer.upi_id || null,
-      gstin: customer.gstin || null, // Add this line
+      gstin_no: customer.gstin_no || null, // Add this line
     });
     setSelectedCustomer(customer);
     setIsUpdateModalOpen(true);
@@ -333,7 +334,7 @@ export function CustomerTable(allCustomers: any) {
                         .replace(/_/g, " ")
                         .toLowerCase()}`}
                       required={
-                        key !== "upi_id" && key !== "pan" && key !== "gstin"
+                        key !== "upi_id" && key !== "pan_no" && key !== "gstin_no"
                       } // Update this line
                     />
                   </div>
