@@ -11,6 +11,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@netlify/remix-adapter": "^2.6.0",
     "@prisma/client": "^6.4.1",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-label": "^2.1.2",
@@ -20,7 +21,6 @@
     "@remix-run/react": "^2.16.0",
     "@remix-run/serve": "^2.16.0",
     "@tailwindcss/vite": "^4.0.9",
-    "@vercel/remix": "^2.15.3",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
