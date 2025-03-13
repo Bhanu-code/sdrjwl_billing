@@ -113,6 +113,7 @@ model SalesPOS {
   master_entry_rate   Float?
   manual_rate         Float?
   unit                String
+  gross_weight        Float 
   net_weight          Float
   making_charges      Float
   sales_total         Float

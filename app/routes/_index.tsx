@@ -42,8 +42,8 @@ import { loginUser } from "~/data/login.server";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
+    { title: "Sunderbai Jewellers" },
+    { name: "description", content: "Welcome to Your Billing Software!" },
   ];
 };
 

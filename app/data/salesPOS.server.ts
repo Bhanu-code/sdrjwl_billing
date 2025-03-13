@@ -15,6 +15,7 @@ export const SalesPOSSchema = z.object({
   master_entry_rate: z.number().optional(),
   manual_rate: z.number().optional(),
   unit: z.string(),
+  gross_weight: z.number(), // Change this to z.number()
   net_weight: z.number(),
   making_charges: z.number(),
   sales_total: z.number(),

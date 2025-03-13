@@ -48,6 +48,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        
         <Meta />
         <Links />
       </head>
@@ -69,7 +70,9 @@ export default function App() {
   return (
     <>
       <div className="w-screen h-screen overflow-hidden">
+      {location.pathname !== "/" && location.pathname !== "/register" && (
         <Navbar companyInfo={companyInfo} />
+      )}
 
         <div className="flex">
           {location.pathname !== "/" && location.pathname !== "/register" && (

@@ -12,35 +12,49 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useToast } from "~/components/ui/toast";
-import { Form } from "@remix-run/react";
+import { Form , useActionData , useNavigation } from "@remix-run/react";
 
 const PurchaseModal = () => {
   const [purity, setPurity] = useState<any>(0.0);
   const [net_weight, setNetWeight] = useState<any>(0);
   const [gold_rate, setGoldRate] = useState<any>(0);
   const [total_amount, setTotalAmount] = useState<any>(0);
+  const [pieces , setPieces] = useState<any>(0);
+  const [isOpen,setIsOpen] = useState(false) //State to control dialog Open/Close
+
+
+  const actionData = useActionData();
+  const navigation = useNavigation(); 
+
+   // Close the dialog if the form submission is successful
+   useEffect(() => {
+    if (navigation.state === "idle" && actionData?.success) {
+      setIsOpen(false); // Close the dialog
+    }
+  }, [navigation.state, actionData]);
 
   // Calculation function
   const calculateTotalAmount = () => {
     const Purity = parseFloat(purity);
     const netWeight = parseFloat(net_weight);
     const goldRate = parseFloat(gold_rate);
+    const Pieces = parseFloat(pieces);
 
-    if (!isNaN(purity) && !isNaN(netWeight) && !isNaN(goldRate)) {
+    if (!isNaN(purity) && !isNaN(netWeight) && !isNaN(goldRate) && !isNaN(pieces)) {
       // Calculation: purity * net_weight * rate / 100
-      const totalAmount = (Purity * netWeight * goldRate) / 100;
+      const totalAmount = (Purity * netWeight * goldRate * Pieces) / 100;
       setTotalAmount(totalAmount.toFixed(2));
     }
   };
 
   useEffect(() => {
     calculateTotalAmount();
-  }, [purity, net_weight, gold_rate]);
+  }, [purity, net_weight, gold_rate,pieces]);
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant={"outline"}>Create Purchase</Button>
+        <Button variant={"outline"} onClick={() => setIsOpen(true)}>Create Purchase</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[1000px]">
         <DialogHeader>
@@ -130,6 +144,9 @@ const PurchaseModal = () => {
               <Input
                 name="pieces"
                 type="number"
+                onChange={(e:any)=>{
+                  setPieces(e.target.value);
+                }}
                 // value={purchase.pieces}
                 // onChange={handleInputChange}
                 className="col-span-3"
@@ -200,10 +217,10 @@ const PurchaseModal = () => {
           </div>
           <br />
           <div className="flex flex-end w-full">
-            <Button onClick={(e:any)=> close()} className="bg-blue-600 ml-auto" type="submit">
+          <Button className="bg-blue-600 ml-auto" type="submit">
               Save Purchase
             </Button>
-          </div>
+          </div>  
         </Form>
         {/* <DialogFooter>
             <Button className="bg-blue-600" type="submit">
