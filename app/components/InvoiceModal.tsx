@@ -17,10 +17,12 @@ interface SalesPOS {
   gstin_no?: string;
   gold_price: number;
   net_weight: number;
+  gross_weight:number;
   sales_total: number;
   total_rate: number;
   reference: string;
   cash_adjustment:number;
+  other_charges?: number;
   gst_type: 'gst' | 'igst';
   created_at: string | Date;
 }
@@ -78,16 +80,24 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   }, []);
 
   // Calculate GST details 
-  const calculateGSTDetails = (sale: SalesPOS): GSTDetails => {
-    const taxableValue = sale.total_rate;
-    
+  const calculateGSTDetails = (sale: SalesPOS) => {
+    // Calculate taxable value (before GST)
+    const taxableValue = sale.sales_total * (1 - sale.discount_percent / 100);
+  
     if (sale.gst_type === 'gst') {
       const cgstRate = 0.015; // 1.5%
       const sgstRate = 0.015; // 1.5%
-      
+  
+      // Calculate CGST and SGST amounts
       const cgstAmount = taxableValue * cgstRate;
       const sgstAmount = taxableValue * sgstRate;
-      
+  
+      // Calculate total rate (taxable value + GST)
+      const totalRate = taxableValue + cgstAmount + sgstAmount;
+  
+      // Calculate total amount (total rate + other charges - cash adjustment)
+      const totalAmount = totalRate + (sale.other_charges || 0) - (sale.cash_adjustment || 0);
+  
       return {
         gstType: 'CGST & SGST',
         cgstRate: cgstRate * 100,
@@ -95,19 +105,28 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
         cgstAmount,
         sgstAmount,
         totalGST: cgstAmount + sgstAmount,
-        totalAmount: taxableValue + cgstAmount + sgstAmount
+        totalRate, // Include total rate in the return object
+        totalAmount, // Include total amount in the return object
       };
     } else {
       const igstRate = 0.03; // 3%
-      
+  
+      // Calculate IGST amount
       const igstAmount = taxableValue * igstRate;
-      
+  
+      // Calculate total rate (taxable value + GST)
+      const totalRate = taxableValue + igstAmount;
+  
+      // Calculate total amount (total rate + other charges - cash adjustment)
+      const totalAmount = totalRate + (sale.other_charges || 0) - (sale.cash_adjustment || 0);
+  
       return {
         gstType: 'IGST',
         igstRate: igstRate * 100,
         igstAmount,
         totalGST: igstAmount,
-        totalAmount: taxableValue + igstAmount
+        totalRate, // Include total rate in the return object
+        totalAmount, // Include total amount in the return object
       };
     }
   };
@@ -163,7 +182,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[1000px] h-4/5 overflow-y-auto">
-        <div id="invoice-content" className="invoice p-4">
+        <div id="invoice-content" className="invoice p-6">
           {/* Header */}
           <div className="header flex justify-between p-2 text-blue-500 border-[1px] border-slate-900">
             <div className="left calistoga-regular">
@@ -190,7 +209,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
           </div>
 
           {/* Gold Rate Section */}
-          <div className="gold-rate ml-10">
+          <div className="gold-rate ml-10 p-3">
             <p><strong>Gold Rate/gm(916)</strong> Rs. {saleData.gold_price.toFixed(2)}</p>
             <p><strong>Add on Value/gm(916)</strong> Rs. 600.00</p>
           </div>
@@ -201,7 +220,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               <thead className="border-[1px] border-slate-900">
                 <tr className="text-left p-2 gap-x-2">
                   <th className="px-2">S.No.</th>
-                  <th className="px-16">Product Description</th>
+                  <th className="px-16">Product </th>
                   <th className="px-2">Purity</th>
                   <th className="px-5">HSN</th>
                   <th className="px-2">Quantity</th>
@@ -211,13 +230,13 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                 </tr>
               </thead>
               <tbody>
-                <tr className="text-center">
+                <tr className="text-center p-2">
                   <td className="px-2">1</td>
                   <td className="px-10">{saleData.product_name}</td>
                   <td className="px-2">916</td>
                   <td className="px-2">7113</td>
                   <td className="px-2">1</td>
-                  <td className="px-2">{saleData.net_weight.toFixed(2)}</td>
+                  <td className="px-2">{saleData.gross_weight.toFixed(2)}</td>
                   <td className="px-2">{saleData.net_weight.toFixed(2)}</td>
                   <td className="px-2">₹{saleData.sales_total.toFixed(2)}</td>
                 </tr>
@@ -227,12 +246,12 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
           {/* Financial Details */}
           <div className="add-ons">
-            <div className="ml-auto w-1/3">
+            <div className="ml-auto w-1/3 space-y-2">
               <div className="flex justify-between">
                 <span><strong>Total Value Before Tax</strong></span>
                 <span>₹{saleData.sales_total.toFixed(2)}</span>
               </div>
-              
+
               {/* GST Breakdown */}
               {saleData.gst_type === 'gst' ? (
                 <>
@@ -251,28 +270,25 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   <span>₹{gstDetails.igstAmount?.toFixed(2) || '0.00'}</span>
                 </div>
               )}
-              
+
               <div className="flex justify-between">
                 <span><strong>Total Value After Tax</strong></span>
-                <span>₹{gstDetails.totalAmount.toFixed(2)}</span>
-              </div>
-              
-              {/* <div className="flex justify-between">
-                <span><strong>Round Off</strong></span>
-                <span>₹0.00</span>
-              </div>
-              
-              <div className="flex justify-between">
-                <span><strong>Hallmark/HUID Charge</strong></span>
-                <span>₹50.00</span>
-              </div> */}
-
-              <div className="flex justify-between">
-                <span><strong>Cash Ajustment</strong></span>
-                <span>₹{saleData?.cash_adjustment?.toFixed(2)}</span>
+                <span>₹{gstDetails.totalRate.toFixed(2)}</span>
               </div>
 
-              
+              {/* Other Charges */}
+              <div className="flex justify-between">
+                <span><strong>Other Charges</strong></span>
+                <span>₹{saleData.other_charges?.toFixed(2) || '0.00'}</span>
+              </div>
+
+              {/* Cash Adjustment */}
+              <div className="flex justify-between">
+                <span><strong>Cash Adjustment</strong></span>
+                <span>₹{saleData.cash_adjustment?.toFixed(2) || '0.00'}</span>
+              </div>
+
+              {/* Total Payable Amount */}
               <div className="flex justify-between">
                 <span><strong>Total Payable Amount</strong></span>
                 <span className="border-[1px] border-slate-900 p-1">
@@ -281,6 +297,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
               </div>
             </div>
           </div>
+       
 
           {/* Amount in Words */}
           <div className="amt-in-words mt-4">

@@ -27,8 +27,9 @@ const SalesPOSFormSchema = z.object({
   product_name: z.string(),
   live_rate: z.string().transform((val) => val !== "manual"), // Convert string to boolean
   gold_price: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
-  manual_rate: z.string().optional().transform((val) => val ? parseFloat(val) : undefined), 
+  manual_rate: z.string().optional().transform((val) => val ? parseFloat(val) : undefined),
   unit: z.string(),
+  gross_weight: z.string().transform((val) => parseFloat(val) || 0), // Ensure this is parsed as a number
   net_weight: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
   making_charges: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
   sales_total: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
@@ -48,7 +49,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const salesPOSData = await getSalesPOSData();
   const masterEntryData = await getMasterEntryData();
   const companyData = await getCompanyInfo();
-  return json({ salesPOSData, masterEntryData , companyData });
+  return json({ salesPOSData, masterEntryData, companyData });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -67,13 +68,13 @@ export async function action({ request }: ActionFunctionArgs) {
         // Create the sales POS entry
         const createdPOS = await createSalesPOS(parsedData);
         return json({ createdPOS, success: true });
-      }catch (error) {
+      } catch (error) {
         console.error("Error creating sales POS:", error);
         return json(
-          { 
-            error: error instanceof Error ? error.message : "Failed to create sales POS entry", 
-            success: false 
-          }, 
+          {
+            error: error instanceof Error ? error.message : "Failed to create sales POS entry",
+            success: false
+          },
           { status: 400 }
         );
       }
@@ -103,10 +104,10 @@ type ActionResponse = {
 };
 
 const SalesPOS = () => {
-  const { salesPOSData, masterEntryData , companyData } = useLoaderData<typeof loader>();
+  const { salesPOSData, masterEntryData, companyData } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<ActionResponse>();
   const [isOpen, setIsOpen] = useState(false);
-
+  const [grossWeight, setGrossWeight] = useState<number>(0);
   // State variables for form inputs
   const [contactNumber, setContactNumber] = useState<string>("");
   const [customerId, setCustomerId] = useState<string>("CUST-" + Date.now()); // Generate a default customer ID
@@ -177,8 +178,9 @@ const SalesPOS = () => {
     switch (unit) {
       case "percentage":
         baseAmount = price * netWeight;
-        total = (baseAmount * percentageValue) / 100;
-        setBaseCalculation(`Base (${price} × ${netWeight}) = ${baseAmount.toFixed(2)}`);
+        const percentageAmount = (baseAmount * percentageValue) / 100;
+        total = baseAmount + percentageAmount;
+        setBaseCalculation(`Base (${price} × ${netWeight}) = ${baseAmount.toFixed(2)} + Percentage (${percentageValue}%) = ${percentageAmount.toFixed(2)}`);
         break;
       case "weight":
         total = netWeight * price;
@@ -188,8 +190,9 @@ const SalesPOS = () => {
         setBaseCalculation("");
         break;
       case "piece":
-        total = price + makingCharges;
+        total = netWeight * goldPrice + makingCharges;
         setBaseCalculation("");
+        break;
         break;
       default:
         total = 0;
@@ -202,9 +205,16 @@ const SalesPOS = () => {
 
   // Calculate total rate
   const calculateTotalRate = () => {
-    let baseAmount = salesTotal * (1 - discountPercent / 100);
-    const gstAmt = calculateGSTAmount(baseAmount);
-    const totalWithGST = baseAmount + gstAmt;
+    // Calculate taxable value (before GST)
+    const taxableValue = salesTotal * (1 - discountPercent / 100);
+
+    // Calculate GST amount
+    const gstAmt = calculateGSTAmount(taxableValue);
+
+    // Calculate total rate (taxable value + GST)
+    const totalWithGST = taxableValue + gstAmt;
+
+    // Set the total rate
     setTotalRate(totalWithGST);
   };
 
@@ -219,11 +229,8 @@ const SalesPOS = () => {
 
   // Calculate total amount
   const calculateTotalAmount = () => {
-    let baseRate = totalRate + otherCharges;
-    if (gstType === "gst" || gstType === "igst") {
-      baseRate *= 1.03; // Apply 3% GST
-    }
-    const finalAmount = baseRate - cashAdjustment;
+    let baseRate = totalRate + otherCharges; // Add other charges to the total rate
+    const finalAmount = baseRate - cashAdjustment; // Subtract cash adjustment
     setTotalAmount(finalAmount);
   };
 
@@ -246,6 +253,7 @@ const SalesPOS = () => {
       setIsOpen(false);
       // Reset form values for next entry
       setContactNumber("");
+      setGrossWeight(0);
       setCustomerId("CUST-" + Date.now());
       setCustomerName("");
       setGstNo("");
@@ -293,7 +301,7 @@ const SalesPOS = () => {
                   <div className="grid grid-cols-3 gap-4">
                     {/* Hidden Customer ID */}
                     <input type="hidden" name="customer_id" value={customerId} />
-                    
+
                     {/* Contact Number */}
                     <div className="flex flex-col gap-1 items-start justify-between">
                       <Label htmlFor="contact_no" className="text-right text-sm">
@@ -398,7 +406,7 @@ const SalesPOS = () => {
                   <div className="grid grid-cols-3 gap-4">
                     {/* Hidden gold_price field - this is critical! */}
                     <input type="hidden" name="gold_price" value={goldPrice} />
-                    
+
                     {/* Live Rate Selection */}
                     <div className="flex flex-col gap-1 items-start justify-between">
                       <Label htmlFor="live_rate" className="text-right text-sm">
@@ -487,6 +495,21 @@ const SalesPOS = () => {
                         />
                       </div>
                     )}
+
+                    <div className="flex flex-col gap-1 items-start justify-between">
+                      <Label htmlFor="gross_weight" className="text-right text-sm">
+                        Gross Weight
+                      </Label>
+                      <Input
+                        id="gross_weight"
+                        name="gross_weight"
+                        type="number"
+                        value={grossWeight}
+                        onChange={(e) => setGrossWeight(parseFloat(e.target.value) || 0)}
+                        placeholder="gross weight"
+                        className="col-span-3"
+                      />
+                    </div>
 
                     {/* Net Weight */}
                     <div className="flex flex-col gap-1 items-start justify-between">
@@ -738,7 +761,7 @@ const SalesPOS = () => {
         </Dialog>
       </div>
       <div className="data-table">
-        <SalesPOSTable data={salesPOSData} companyData ={companyData} />
+        <SalesPOSTable data={salesPOSData} companyData={companyData} />
       </div>
     </div>
   );

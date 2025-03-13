@@ -43,16 +43,13 @@ export async function action({ request }: ActionFunctionArgs) {
   const formType: any = userData?.form_type;
 
   if (formType === "create-form") {
-    return createPurchase(userData);
-  } else if(formType === "delete-form"){
-    return deletePurchaseById(Number(userData.purchaseId))
+    await createPurchase(userData);
+    return { success: true }; // Return success flag
+  } else if (formType === "delete-form") {
+    await deletePurchaseById(Number(userData.purchaseId));
+    return { success: true }; // Return success flag
   }
-  // else if(formType === "update-form") {
-  //   return updateProduct(userData, Number(userData.customerId));
-  // }
-
 }
-
 
 export default Purchase
 

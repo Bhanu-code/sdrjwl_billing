@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { 
-  FaEye, 
+import {
+  FaEye,
   FaTrash,
   FaUser,
   FaShoppingBag,
@@ -17,12 +17,12 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
   DialogFooter
 } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
@@ -45,6 +45,7 @@ interface SalesPOS {
   gold_price: number;
   manual_rate?: number | null;
   unit: string;
+  gross_weight:number;
   net_weight: number;
   making_charges: number;
   sales_total: number;
@@ -62,10 +63,10 @@ interface SalesPOS {
 
 interface POSTableProps {
   data: SalesPOS[];
-  companyData: CompanyInvoiceDetails; 
+  companyData: CompanyInvoiceDetails;
 }
 
-export function SalesPOSTable({ data , companyData  }: POSTableProps) {
+export function SalesPOSTable({ data, companyData }: POSTableProps) {
   const [salesPos, setSalesPOS] = useState<SalesPOS[]>(data || []);
   const [selectedSale, setSelectedSale] = useState<SalesPOS | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -74,19 +75,27 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const { toast } = useToast();
   const fetcher = useFetcher();
-  
+
   const [updateFormData, setUpdateFormData] = useState<Partial<SalesPOS>>({});
 
   const calculateGSTDetails = (sale: SalesPOS) => {
-    const taxableValue = sale.total_rate;
-    
+    // Calculate taxable value (before GST)
+    const taxableValue = sale.sales_total * (1 - sale.discount_percent / 100);
+  
     if (sale.gst_type === 'gst') {
       const cgstRate = 0.015; // 1.5%
       const sgstRate = 0.015; // 1.5%
-      
+  
+      // Calculate CGST and SGST amounts
       const cgstAmount = taxableValue * cgstRate;
       const sgstAmount = taxableValue * sgstRate;
-      
+  
+      // Calculate total rate (taxable value + GST)
+      const totalRate = taxableValue + cgstAmount + sgstAmount;
+  
+      // Calculate total amount (total rate + other charges - cash adjustment)
+      const totalAmount = totalRate + (sale.other_charges || 0) - (sale.cash_adjustment || 0);
+  
       return {
         gstType: 'CGST & SGST',
         cgstRate: cgstRate * 100,
@@ -94,19 +103,28 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
         cgstAmount,
         sgstAmount,
         totalGST: cgstAmount + sgstAmount,
-        totalAmount: taxableValue + cgstAmount + sgstAmount
+        totalRate, // Include total rate in the return object
+        totalAmount, // Include total amount in the return object
       };
     } else {
       const igstRate = 0.03; // 3%
-      
+  
+      // Calculate IGST amount
       const igstAmount = taxableValue * igstRate;
-      
+  
+      // Calculate total rate (taxable value + GST)
+      const totalRate = taxableValue + igstAmount;
+  
+      // Calculate total amount (total rate + other charges - cash adjustment)
+      const totalAmount = totalRate + (sale.other_charges || 0) - (sale.cash_adjustment || 0);
+  
       return {
         gstType: 'IGST',
         igstRate: igstRate * 100,
         igstAmount,
         totalGST: igstAmount,
-        totalAmount: taxableValue + igstAmount
+        totalRate, // Include total rate in the return object
+        totalAmount, // Include total amount in the return object
       };
     }
   };
@@ -127,10 +145,10 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
     if (!selectedSale) return;
 
     fetcher.submit(
-      { 
-        ...updateFormData, 
-        id: selectedSale.id?.toString() || "", 
-        intent: "update" 
+      {
+        ...updateFormData,
+        id: selectedSale.id?.toString() || "",
+        intent: "update"
       },
       { method: "POST" }
     );
@@ -142,11 +160,11 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
         title: "Success",
         description: "Sale updated successfully",
       });
-      
+
       // Update the local state if the submission was successful
       if (selectedSale.id) {
-        setSalesPOS(prevSales => 
-          prevSales.map(sale => 
+        setSalesPOS(prevSales =>
+          prevSales.map(sale =>
             sale.id === selectedSale.id ? { ...sale, ...updateFormData } : sale
           )
         );
@@ -161,16 +179,16 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
 
   const handleDeleteConfirm = () => {
     if (!selectedSale || !selectedSale.id) return;
-  
+
     fetcher.submit(
-      { 
-        id: selectedSale.id.toString(), 
-        intent: "delete" 
+      {
+        id: selectedSale.id.toString(),
+        intent: "delete"
       },
       { method: "POST" }
     );
   };
-  
+
   // Add this useEffect to handle the fetcher state changes
   useEffect(() => {
     if (fetcher.state === "idle" && fetcher.data && !fetcher.data.error && selectedSale) {
@@ -178,10 +196,10 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
       if (fetcher.data.success && selectedSale.id) {
         // Update the local state
         setSalesPOS(prevSales => prevSales.filter(sale => sale.id !== selectedSale.id));
-        
+
         // Close the modal
         setIsDeleteModalOpen(false);
-        
+
         // Show success toast
         toast({
           title: "Success",
@@ -231,6 +249,7 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
             <TableHead>Product Code</TableHead>
             <TableHead>Product Name</TableHead>
             <TableHead>Customer Name</TableHead>
+            <TableHead>Gross Weight</TableHead>
             <TableHead>Net Weight (gm)</TableHead>
             <TableHead>Total Amount</TableHead>
             <TableHead>Created At</TableHead>
@@ -243,32 +262,33 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
               <TableCell>{sale.product_code}</TableCell>
               <TableCell>{sale.product_name}</TableCell>
               <TableCell>{sale.customer_name || 'N/A'}</TableCell>
+              <TableCell>{sale.gross_weight.toFixed(2)}</TableCell>
               <TableCell>{sale.net_weight.toFixed(2)}</TableCell>
               <TableCell>₹{sale.total_amount.toFixed(2)}</TableCell>
               <TableCell>{new Date(sale.created_at).toLocaleString()}</TableCell>
               <TableCell>
                 <div className="flex space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
+                  <Button
+                    variant="outline"
+                    size="icon"
                     onClick={() => handleViewDetails(sale)}
                     className="h-8 w-8"
                   >
                     <FaEye className="h-4 w-4" />
                   </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
+
+                  <Button
+                    variant="outline"
+                    size="icon"
                     onClick={() => handlePrintInvoice(sale)}
                     className="h-8 w-8"
                   >
                     <FaPrint className="h-4 w-4" />
                   </Button>
-                  
-                  <Button 
-                    variant="destructive" 
-                    size="icon" 
+
+                  <Button
+                    variant="destructive"
+                    size="icon"
                     onClick={() => handleOpenDeleteModal(sale)}
                     className="h-8 w-8"
                   >
@@ -290,11 +310,11 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
       </Table>
 
       {selectedSale && (
-        <Dialog 
-          open={isDetailModalOpen} 
+        <Dialog
+          open={isDetailModalOpen}
           onOpenChange={setIsDetailModalOpen}
         >
-          <DialogContent className="sm:max-w-4xl h-[97%]">
+          <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold flex items-center">
                 <FaReceipt className="mr-3 text-blue-600" />
@@ -304,7 +324,7 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
                 Comprehensive details for Product Code: {selectedSale.product_code}
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="border-b border-gray-200 "></div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -342,6 +362,10 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
                   <div className="flex justify-between">
                     <span className="text-gray-500">Unit</span>
                     <span className="font-medium">{selectedSale.unit}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Gross Weight</span>
+                    <span className="font-medium">{selectedSale.gross_weight.toFixed(2)} gm</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Net Weight</span>
@@ -398,14 +422,14 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
                 </div>
                 {(() => {
                   const gstDetails = calculateGSTDetails(selectedSale);
-                  
+
                   return (
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-gray-500">GST Type</span>
                         <span className="font-medium">{gstDetails.gstType}</span>
                       </div>
-                      
+
                       {gstDetails.gstType === 'CGST & SGST' ? (
                         <>
                           <div className="flex justify-between">
@@ -437,15 +461,19 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
                           </div>
                         </>
                       )}
-                      
+
                       <div className="border-b border-gray-200 my-2"></div>
-                    
+
                       <div className="flex justify-between font-bold">
                         <span>Total GST</span>
                         <span>₹{gstDetails.totalGST.toFixed(2)}</span>
                       </div>
+                      <div className="flex justify-between font-bold">
+                        <span>Total Rate (Inc. GST)</span>
+                        <span>₹{gstDetails.totalRate.toFixed(2)}</span>
+                      </div>
                       <div className="flex justify-between font-bold text-blue-600">
-                        <span>Total Amount (Inc. GST)</span>
+                        <span>Total Amount (Inc. GST + Other Charges - Cash Adjustment)</span>
                         <span>₹{gstDetails.totalAmount.toFixed(2)}</span>
                       </div>
                     </div>
@@ -457,8 +485,8 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
         </Dialog>
       )}
 
-       <Dialog 
-        open={isUpdateModalOpen} 
+      <Dialog
+        open={isUpdateModalOpen}
         onOpenChange={setIsUpdateModalOpen}
       >
         <DialogContent className="sm:max-w-[800px]">
@@ -472,67 +500,67 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Contact Number</Label>
-              <Input 
-                value={updateFormData.contact_number || ''} 
+              <Input
+                value={updateFormData.contact_number || ''}
                 onChange={(e) => handleUpdateFormChange('contact_number', e.target.value)}
               />
             </div>
 
             <div>
               <Label>Customer Name</Label>
-              <Input 
-                value={updateFormData.customer_name || ''} 
+              <Input
+                value={updateFormData.customer_name || ''}
                 onChange={(e) => handleUpdateFormChange('customer_name', e.target.value)}
               />
             </div>
 
             <div>
               <Label>GSTIN No</Label>
-              <Input 
-                value={updateFormData.gstin_no || ''} 
+              <Input
+                value={updateFormData.gstin_no || ''}
                 onChange={(e) => handleUpdateFormChange('gstin_no', e.target.value)}
               />
             </div>
 
             <div>
               <Label>Product Name</Label>
-              <Input 
-                value={updateFormData.product_name || ''} 
+              <Input
+                value={updateFormData.product_name || ''}
                 onChange={(e) => handleUpdateFormChange('product_name', e.target.value)}
               />
             </div>
 
             <div>
               <Label>Net Weight</Label>
-              <Input 
+              <Input
                 type="number"
-                value={updateFormData.net_weight || 0} 
+                value={updateFormData.net_weight || 0}
                 onChange={(e) => handleUpdateFormChange('net_weight', parseFloat(e.target.value))}
               />
             </div>
 
             <div>
               <Label>Making Charges</Label>
-              <Input 
+              <Input
                 type="number"
-                value={updateFormData.making_charges || 0} 
+                value={updateFormData.making_charges || 0}
                 onChange={(e) => handleUpdateFormChange('making_charges', parseFloat(e.target.value))}
               />
             </div>
 
             <div>
               <Label>Discount Percent</Label>
-              <Input 
+              <Input
                 type="number"
-                value={updateFormData.discount_percent || 0} 
+                value={updateFormData.discount_percent || 0}
                 onChange={(e) => handleUpdateFormChange('discount_percent', parseFloat(e.target.value))}
               />
             </div>
           </div>
 
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsUpdateModalOpen(false)}
             >
               Cancel
@@ -544,8 +572,8 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
         </DialogContent>
       </Dialog>
 
-      <Dialog 
-        open={isDeleteModalOpen} 
+      <Dialog
+        open={isDeleteModalOpen}
         onOpenChange={setIsDeleteModalOpen}
       >
         <DialogContent>
@@ -557,14 +585,14 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
           </DialogHeader>
 
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsDeleteModalOpen(false)}
             >
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={handleDeleteConfirm}
             >
               Delete
@@ -573,14 +601,14 @@ export function SalesPOSTable({ data , companyData  }: POSTableProps) {
         </DialogContent>
       </Dialog>
 
-       {selectedSale && (
-        <InvoiceModal 
+      {selectedSale && (
+        <InvoiceModal
           isOpen={isPrintModalOpen}
           onOpenChange={setIsPrintModalOpen}
           saleData={selectedSale}
           companyData={companyData}
         />
-      )} 
+      )}
 
     </>
   );
