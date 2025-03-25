@@ -1,13 +1,11 @@
 [build]
-  command = "npm install --legacy-peer-deps && npm run build"
-  publish = "public"
-  functions = "netlify/functions"
+  command = "echo 'No build step needed'"
+  publish = "."
 
-[dev]
-  command = "npm run dev"
-  port = 3000
+[build.environment]
+  PORT = "8080"
 
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/server"
-  status = 200
+[[services]]
+  name = "sdrjwl-container-service"
+  dockerfile = "Dockerfile"
+  port = 8080
