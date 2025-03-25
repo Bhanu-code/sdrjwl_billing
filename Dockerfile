@@ -7,7 +7,7 @@ RUN apt-get update -y && \
     rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY . .
 RUN npm run build
 # Generate Prisma client during build
