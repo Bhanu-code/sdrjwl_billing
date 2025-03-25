@@ -8,9 +8,6 @@ withEsbuildOverride((option) => {
 });
 
 module.exports = {
-  serverBuildTarget: "netlify",
-  server: "./server.js",
-  ignoredRouteFiles: ["**/.*"],
   appDirectory: 'app',
   assetsBuildDirectory: 'public/build',
   publicPath: '/build/',
@@ -21,6 +18,9 @@ module.exports = {
       route('/', 'routes/index.tsx');
     });
   },
+  serverModuleFormat: 'cjs',
+  server: './server.js', // Optional Vercel server configuration
+  ignoredRouteFiles: ['**/.*'],
   serverDependenciesToBundle: [
     // Add any dependencies that need to be bundled for the server
   ],
