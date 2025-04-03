@@ -78,6 +78,7 @@ model Product {
   hallmark_no    String?
   other_charges  Int?
   unit           String?
+  purity         String? 
   created_at     DateTime? @default(now())
   updated_at     DateTime? @updatedAt
 }
@@ -126,6 +127,7 @@ model SalesPOS {
   reference           String
   pay_mode            String
   cash_adjustment     Float
+  purity       String? @default("0")
   created_at          DateTime @default(now())
   updated_at          DateTime? @updatedAt
 }

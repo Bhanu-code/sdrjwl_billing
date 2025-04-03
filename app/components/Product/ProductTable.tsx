@@ -48,6 +48,7 @@ type Product = {
   other_charges: number | null;
   product_id: number;
   created_at: string;
+  purity: string | null;
 };
 
 interface TableDemoProps {
@@ -65,7 +66,7 @@ export function ProductTable({ products }: TableDemoProps) {
   );
   const { toast } = useToast();
 
-  console.log("Products : ",products)
+  console.log("Products : ", products)
 
   // Handler for deleting a product
   const handleDeleteProduct = async () => {
@@ -112,6 +113,7 @@ export function ProductTable({ products }: TableDemoProps) {
       barcode_number: product.barcode_number,
       hallmark_no: product.hallmark_no,
       other_charges: product.other_charges,
+      purity: product.purity || "",
     });
     setIsUpdateModalOpen(true);
   };
@@ -152,6 +154,7 @@ export function ProductTable({ products }: TableDemoProps) {
   return (
     <>
       {/* Product Table */}
+      <div className="w-full overflow-x-auto shadow-md rounded-lg border mt-5">
       <Table>
         <TableHeader>
           <TableRow>
@@ -159,6 +162,7 @@ export function ProductTable({ products }: TableDemoProps) {
             <TableHead>Code</TableHead>
             <TableHead>Net Weight (gm)</TableHead>
             <TableHead>Gross Weight (gm)</TableHead>
+            <TableHead>Purity</TableHead>
             <TableHead>HUID No.</TableHead>
             <TableHead>HSN Code</TableHead>
             <TableHead>Sales Rate</TableHead>
@@ -166,7 +170,7 @@ export function ProductTable({ products }: TableDemoProps) {
             <TableHead>Barcode</TableHead>
             <TableHead>Making Charges</TableHead>
             <TableHead>Hallmark</TableHead>
-            <TableHead>Other Charges</TableHead>
+            {/* <TableHead>Other Charges</TableHead> */}
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -177,6 +181,7 @@ export function ProductTable({ products }: TableDemoProps) {
               <TableCell>{product.product_id ? product.product_id : "--|--"}</TableCell>
               <TableCell>{product.net_weight}</TableCell>
               <TableCell>{product.gross_weight}</TableCell>
+              <TableCell>{product.purity || "N/A"}</TableCell>
               <TableCell>{product.huid_no || "N/A"}</TableCell>
               <TableCell>{product.hsn_code}</TableCell>
               <TableCell>₹{product.sales_rate.toFixed(2)}</TableCell>
@@ -196,11 +201,11 @@ export function ProductTable({ products }: TableDemoProps) {
               </TableCell>
               <TableCell>₹{product.making_charges.toFixed(2)}</TableCell>
               <TableCell>{product.hallmark_no || "N/A"}</TableCell>
-              <TableCell>
+              {/* <TableCell>
                 {product.other_charges
                   ? `₹${product.other_charges.toFixed(2)}`
                   : "N/A"}
-              </TableCell>
+              </TableCell> */}
               <TableCell>
                 <div className="flex space-x-2">
                   <Button
@@ -233,6 +238,7 @@ export function ProductTable({ products }: TableDemoProps) {
           ))}
         </TableBody>
       </Table>
+      </div>
 
       {/* Product Details Modal */}
       {selectedProduct && (
@@ -267,7 +273,13 @@ export function ProductTable({ products }: TableDemoProps) {
                   <div className="flex justify-between">
                     <span className="text-gray-500">Product Code</span>
                     <span className="font-medium">
-                      {selectedProduct.product_code}
+                      {selectedProduct.product_id}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Purity</span>
+                    <span className="font-medium">
+                      {selectedProduct.purity || "N/A"}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -459,6 +471,19 @@ export function ProductTable({ products }: TableDemoProps) {
                   }
                   placeholder="Enter net weight"
                   required
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="purity">Purity</Label>
+                <Input
+                  id="purity"
+                  name="purity"
+                  value={updateFormFields.purity || ""}
+                  onChange={(e) =>
+                    handleUpdateInputChange("purity", e.target.value)
+                  }
+                  placeholder="Enter purity "
                 />
               </div>
 

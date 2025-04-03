@@ -10,6 +10,7 @@ export const SalesPOSSchema = z.object({
   gstin_no: z.string(),
   product_code: z.string(),
   product_name: z.string(),
+  purity: z.string().optional(),
   gold_price: z.number(),
   live_rate: z.boolean(),
   master_entry_rate: z.number().optional(),

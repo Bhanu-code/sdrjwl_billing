@@ -19,11 +19,11 @@ const Purchase = () => {
   };
 
   return (
-    <div className="m-3">
-      <div className="actions">
+    <div className="m-3 h-[calc(100vh-150px)] flex flex-col">
+      <div className="actions mb-4">
         <PurchaseModal />
       </div>
-      <div className="table w-full">
+      <div className="table flex-grow overflow-y-auto">
         <PurchaseTable refreshTable={purchases} />
       </div>
     </div>

@@ -45,7 +45,7 @@ interface SalesPOS {
   gold_price: number;
   manual_rate?: number | null;
   unit: string;
-  gross_weight:number;
+  gross_weight: number;
   net_weight: number;
   making_charges: number;
   sales_total: number;
@@ -59,6 +59,7 @@ interface SalesPOS {
   reference?: string;
   pay_mode?: string;
   cash_adjustment?: number;
+  purity: string | null;
 }
 
 interface POSTableProps {
@@ -81,21 +82,21 @@ export function SalesPOSTable({ data, companyData }: POSTableProps) {
   const calculateGSTDetails = (sale: SalesPOS) => {
     // Calculate taxable value (before GST)
     const taxableValue = sale.sales_total * (1 - sale.discount_percent / 100);
-  
+
     if (sale.gst_type === 'gst') {
       const cgstRate = 0.015; // 1.5%
       const sgstRate = 0.015; // 1.5%
-  
+
       // Calculate CGST and SGST amounts
       const cgstAmount = taxableValue * cgstRate;
       const sgstAmount = taxableValue * sgstRate;
-  
+
       // Calculate total rate (taxable value + GST)
       const totalRate = taxableValue + cgstAmount + sgstAmount;
-  
+
       // Calculate total amount (total rate + other charges - cash adjustment)
       const totalAmount = totalRate + (sale.other_charges || 0) - (sale.cash_adjustment || 0);
-  
+
       return {
         gstType: 'CGST & SGST',
         cgstRate: cgstRate * 100,
@@ -108,16 +109,16 @@ export function SalesPOSTable({ data, companyData }: POSTableProps) {
       };
     } else {
       const igstRate = 0.03; // 3%
-  
+
       // Calculate IGST amount
       const igstAmount = taxableValue * igstRate;
-  
+
       // Calculate total rate (taxable value + GST)
       const totalRate = taxableValue + igstAmount;
-  
+
       // Calculate total amount (total rate + other charges - cash adjustment)
       const totalAmount = totalRate + (sale.other_charges || 0) - (sale.cash_adjustment || 0);
-  
+
       return {
         gstType: 'IGST',
         igstRate: igstRate * 100,
@@ -243,11 +244,13 @@ export function SalesPOSTable({ data, companyData }: POSTableProps) {
 
   return (
     <>
-      <Table>
-        <TableHeader>
+    <div className="relative overflow-auto max-h-[calc(100vh-200px)] rounded-lg border">
+      <Table className="w-full">
+      <TableHeader className="sticky top-0 bg-white z-10">
           <TableRow>
             <TableHead>Product Code</TableHead>
             <TableHead>Product Name</TableHead>
+            <TableHead>Purity</TableHead>
             <TableHead>Customer Name</TableHead>
             <TableHead>Gross Weight</TableHead>
             <TableHead>Net Weight (gm)</TableHead>
@@ -256,11 +259,12 @@ export function SalesPOSTable({ data, companyData }: POSTableProps) {
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="overflow-y-auto">
           {salesPos?.map((sale) => (
             <TableRow key={sale.product_code}>
               <TableCell>{sale.product_code}</TableCell>
               <TableCell>{sale.product_name}</TableCell>
+              <TableCell>{sale.purity || "N/A"}</TableCell>
               <TableCell>{sale.customer_name || 'N/A'}</TableCell>
               <TableCell>{sale.gross_weight.toFixed(2)}</TableCell>
               <TableCell>{sale.net_weight.toFixed(2)}</TableCell>
@@ -299,7 +303,7 @@ export function SalesPOSTable({ data, companyData }: POSTableProps) {
             </TableRow>
           ))}
         </TableBody>
-        <TableFooter>
+        <TableFooter className="sticky bottom-0 bg-white">
           <TableRow>
             <TableCell colSpan={4}>Total Sales</TableCell>
             <TableCell className="text-right">₹{totalAmount.toFixed(2)}</TableCell>
@@ -370,6 +374,10 @@ export function SalesPOSTable({ data, companyData }: POSTableProps) {
                   <div className="flex justify-between">
                     <span className="text-gray-500">Net Weight</span>
                     <span className="font-medium">{selectedSale.net_weight.toFixed(2)} gm</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Purity</span>
+                    <span className="font-medium">{selectedSale.purity || "N/A"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Barcode Number</span>
@@ -609,7 +617,7 @@ export function SalesPOSTable({ data, companyData }: POSTableProps) {
           companyData={companyData}
         />
       )}
-
+</div>
     </>
   );
 }

@@ -125,171 +125,174 @@ export function CustomerTable(allCustomers: any) {
   console.log("all customers", allCustomers);
 
   return (
-    <div className="p-4">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Address</TableHead>
-            <TableHead>Contact No.</TableHead>
-            <TableHead>City</TableHead>
-            <TableHead>State</TableHead>
-            <TableHead>Pincode</TableHead>
-            <TableHead>GSTIN</TableHead> {/* Add this line */}
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {allCustomers?.data?.map((customer: any) => (
-            <TableRow key={customer.id}>
-              <TableCell>{customer.name}</TableCell>
-              <TableCell>{customer.address}</TableCell>
-              <TableCell>{customer.contact_no}</TableCell>
-              <TableCell>{customer.city}</TableCell>
-              <TableCell>{customer.state}</TableCell>
-              <TableCell>{customer.pincode}</TableCell>
-              <TableCell>{customer.gstin_no || "N/A"}</TableCell>{" "}
-              {/* Add this line */}
-              <TableCell>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleViewDetails(customer)}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleUpdateCustomer(customer)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => handleDeleteConfirmation(customer.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
+    <div className="p-4 h-[calc(100vh-200px)] overflow-y-auto">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Address</TableHead>
+              <TableHead>Contact No.</TableHead>
+              <TableHead>City</TableHead>
+              <TableHead>State</TableHead>
+              <TableHead>Pincode</TableHead>
+              <TableHead>GSTIN</TableHead> {/* Add this line */}
+              <TableHead>Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {allCustomers?.data?.map((customer: any) => (
+              <TableRow key={customer.id}>
+                <TableCell>{customer.name}</TableCell>
+                <TableCell>{customer.address}</TableCell>
+                <TableCell>{customer.contact_no}</TableCell>
+                <TableCell>{customer.city}</TableCell>
+                <TableCell>{customer.state}</TableCell>
+                <TableCell>{customer.pincode}</TableCell>
+                <TableCell>{customer.gstin_no || "N/A"}</TableCell>{" "}
+                {/* Add this line */}
+                <TableCell>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleViewDetails(customer)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleUpdateCustomer(customer)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => handleDeleteConfirmation(customer.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
-      {/* Customer Details Modal */}
-      {selectedCustomer && (
-        <Dialog
-          open={isDetailModalOpen}
-          onOpenChange={() => setSelectedCustomer(null)}
-        >
-          <DialogContent className="sm:max-w-4xl">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold flex items-center">
-                <FaUser className="mr-3 text-blue-600" />
-                Customer Details
-              </DialogTitle>
-            </DialogHeader>
+        {/* Customer Details Modal */}
+        {selectedCustomer && (
+          <Dialog
+            open={isDetailModalOpen}
+            onOpenChange={() => setSelectedCustomer(null)}
+          >
+            <DialogContent className="sm:max-w-4xl">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold flex items-center">
+                  <FaUser className="mr-3 text-blue-600" />
+                  Customer Details
+                </DialogTitle>
+              </DialogHeader>
 
-            <div className="border-b border-gray-200 my-4"></div>
+              <div className="border-b border-gray-200 my-4"></div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Personal Information Card */}
-              <div className="bg-white shadow-md rounded-lg p-6">
-                <div className="flex items-center mb-4">
-                  <FaIdCard className="mr-3 text-blue-600 text-xl" />
-                  <h3 className="text-lg font-semibold">
-                    Personal Information
-                  </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Personal Information Card */}
+                <div className="bg-white shadow-md rounded-lg p-6">
+                  <div className="flex items-center mb-4">
+                    <FaIdCard className="mr-3 text-blue-600 text-xl" />
+                    <h3 className="text-lg font-semibold">
+                      Personal Information
+                    </h3>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Customer Name</span>
+                      <span className="font-medium">
+                        {selectedCustomer.name}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">PAN</span>
+                      <span className="font-medium">
+                        {selectedCustomer.pan_no || "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">GSTIN</span>
+                      <span className="font-medium">
+                        {selectedCustomer.gstin_no || "N/A"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Customer Name</span>
-                    <span className="font-medium">
-                      {selectedCustomer.name}
-                    </span>
+
+                {/* Contact Details Card */}
+                <div className="bg-white shadow-md rounded-lg p-6">
+                  <div className="flex items-center mb-4">
+                    <FaPhone className="mr-3 text-blue-600 text-xl" />
+                    <h3 className="text-lg font-semibold">Contact Information</h3>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">PAN</span>
-                    <span className="font-medium">
-                      {selectedCustomer.pan_no || "N/A"}
-                    </span>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Contact Number</span>
+                      <span className="font-medium">
+                        {selectedCustomer.contact_no}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">UPI ID</span>
+                      <span className="font-medium">
+                        {selectedCustomer.upi_id || "N/A"}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">GSTIN</span>
-                    <span className="font-medium">
-                      {selectedCustomer.gstin_no || "N/A"}
-                    </span>
+                </div>
+
+                {/* Address Details Card */}
+                <div className="bg-white shadow-md rounded-lg p-6">
+                  <div className="flex items-center mb-4">
+                    <FaAddressCard className="mr-3 text-blue-600 text-xl" />
+                    <h3 className="text-lg font-semibold">Address Information</h3>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Full Address</span>
+                      <span className="font-medium">
+                        {selectedCustomer.address}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">City</span>
+                      <span className="font-medium">{selectedCustomer.city}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">District</span>
+                      <span className="font-medium">
+                        {selectedCustomer.district}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">State</span>
+                      <span className="font-medium">
+                        {selectedCustomer.state}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Pincode</span>
+                      <span className="font-medium">
+                        {selectedCustomer.pincode}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
+            </DialogContent>
+          </Dialog>
+        )}
 
-              {/* Contact Details Card */}
-              <div className="bg-white shadow-md rounded-lg p-6">
-                <div className="flex items-center mb-4">
-                  <FaPhone className="mr-3 text-blue-600 text-xl" />
-                  <h3 className="text-lg font-semibold">Contact Information</h3>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Contact Number</span>
-                    <span className="font-medium">
-                      {selectedCustomer.contact_no}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">UPI ID</span>
-                    <span className="font-medium">
-                      {selectedCustomer.upi_id || "N/A"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Address Details Card */}
-              <div className="bg-white shadow-md rounded-lg p-6">
-                <div className="flex items-center mb-4">
-                  <FaAddressCard className="mr-3 text-blue-600 text-xl" />
-                  <h3 className="text-lg font-semibold">Address Information</h3>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Full Address</span>
-                    <span className="font-medium">
-                      {selectedCustomer.address}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">City</span>
-                    <span className="font-medium">{selectedCustomer.city}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">District</span>
-                    <span className="font-medium">
-                      {selectedCustomer.district}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">State</span>
-                    <span className="font-medium">
-                      {selectedCustomer.state}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Pincode</span>
-                    <span className="font-medium">
-                      {selectedCustomer.pincode}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      </div>
 
       <Dialog
         open={isUpdateModalOpen}

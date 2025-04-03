@@ -31,6 +31,7 @@ export type ProductFormFields = {
   making_charges: string;
   hallmark_no: string;
   other_charges: string;
+  purity: string;
 };
 
 export function ProductForm() {
@@ -46,6 +47,7 @@ export function ProductForm() {
     making_charges: "",
     hallmark_no: "",
     other_charges: "",
+    purity: "",
   });
 
   const handleInputChange = (field: keyof ProductFormFields, value: string) => {
@@ -99,6 +101,7 @@ export function ProductForm() {
       type: "number",
       step: "0.01",
     },
+    { key: "purity", label: "Purity", type: "text", required: true },
   ];
 
   return (
@@ -139,6 +142,7 @@ export function ProductForm() {
                   />
                 </div>
               ))}
+
             <div className="flex flex-col gap-2">
               <Label>Unit</Label>
               <Select
