@@ -22,6 +22,8 @@ interface SalesPOS {
   total_rate: number;
   reference: string;
   cash_adjustment:number;
+  making_charges:number;
+  purity:string;
   other_charges?: number;
   gst_type: 'gst' | 'igst';
   created_at: string | Date;
@@ -210,8 +212,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
           {/* Gold Rate Section */}
           <div className="gold-rate ml-10 p-3">
-            <p><strong>Gold Rate/gm(916)</strong> Rs. {saleData.gold_price.toFixed(2)}</p>
-            <p><strong>Add on Value/gm(916)</strong> Rs. 600.00</p>
+            <p><strong>Rate/gm</strong> Rs. {saleData.gold_price.toFixed(2)}</p>
+            <p><strong>Making Charges(916)</strong> Rs.{saleData.making_charges.toFixed(2)}</p>
           </div>
 
           {/* Product Table */}
@@ -233,7 +235,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
                 <tr className="text-center p-2">
                   <td className="px-2">1</td>
                   <td className="px-10">{saleData.product_name}</td>
-                  <td className="px-2">916</td>
+                  <td className="px-2">{saleData.purity}</td>
                   <td className="px-2">7113</td>
                   <td className="px-2">1</td>
                   <td className="px-2">{saleData.gross_weight.toFixed(2)}</td>

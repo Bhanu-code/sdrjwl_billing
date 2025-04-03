@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `SalesPOS` ADD COLUMN `purity` VARCHAR(191) NULL DEFAULT '0';

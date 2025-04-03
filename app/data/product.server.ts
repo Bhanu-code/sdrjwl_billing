@@ -32,6 +32,7 @@ export async function createProduct(userData: any) {
       hallmark_no: userData.hallmark_no,
       other_charges: Number(userData.other_charges),
       unit: userData.unit,
+      purity: userData.purity || null,
     },
   });
 
@@ -68,6 +69,7 @@ export async function updateProduct(userData: any, id: any) {
       hallmark_no: userData.hallmark_no,
       other_charges: Number(userData.other_charges),
       unit: userData.unit,
+      purity: userData.purity || null,
     },
   });
 

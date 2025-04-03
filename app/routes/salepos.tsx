@@ -43,6 +43,7 @@ const SalesPOSFormSchema = z.object({
   pay_mode: z.string(),
   cash_adjustment: z.string().transform((val) => parseFloat(val) || 0), // Convert string to number
   master_entry_rate: z.string().optional().transform((val) => val ? parseFloat(val) : undefined), // Convert string to number or undefined
+  purity: z.string().optional(),
 });
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -134,6 +135,7 @@ const SalesPOS = () => {
   const [selectedLiveRatePrice, setSelectedLiveRatePrice] = useState<number>(6000); // Default rate
   const [baseCalculation, setBaseCalculation] = useState<string>("");
   const [goldPrice, setGoldPrice] = useState<number>(6000); // Default gold price
+  const [purity, setPurity] = useState<string>(""); // Add this line
 
   // Set default live rate prices - in a real app, these would come from an API or database
   const liveRatePrices = masterEntryData[0] || {
@@ -266,6 +268,7 @@ const SalesPOS = () => {
       setOtherCharges(0);
       setReference("");
       setCashAdjustment(0);
+      setPurity("");
     }
   };
 
@@ -655,6 +658,20 @@ const SalesPOS = () => {
                       />
                     </div>
 
+                    <div className="flex flex-col gap-1 items-start justify-between">
+                      <Label htmlFor="purity" className="text-right text-sm">
+                        Purity
+                      </Label>
+                      <Input
+                        id="purity"
+                        name="purity"
+                        value={purity}
+                        onChange={(e) => setPurity(e.target.value)}
+                        placeholder="Enter purity"
+                        className="col-span-3"
+                      />
+                    </div>
+
                     {/* Other Charges */}
                     <div className="flex flex-col gap-1 items-start justify-between">
                       <Label htmlFor="other_charges" className="text-right text-sm">
@@ -760,7 +777,7 @@ const SalesPOS = () => {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="data-table">
+      <div className="data-table overflow-auto max-h-[calc(100vh-200px)] mt-10"> {/* Add this wrapper */}
         <SalesPOSTable data={salesPOSData} companyData={companyData} />
       </div>
     </div>

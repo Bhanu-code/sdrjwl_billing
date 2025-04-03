@@ -9,7 +9,7 @@ const ProductsPage = () => {
   const productData = useLoaderData<typeof loader>();
 
   return (
-    <div className="p-5">
+    <div className="p-5 h-[calc(100vh-200px)] overflow-y-auto"> 
       <h1 className="text-2xl font-bold mb-4">Product Management</h1>
       <ProductForm />
       <ProductTable products={productData} />
